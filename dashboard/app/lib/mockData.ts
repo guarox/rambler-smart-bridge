@@ -67,57 +67,63 @@ export const hrrGrid: WindCell[] = [
   { lat: 41.87, lon: -87.24, speed: 14.3, dir: 273 },
 ];
 
+// TWD=274°, Rambler COG=312° (TWA≈38°)
+// Effective TWA = |(COG-TWD+360)%360 - 180|, normalize if >90°
 export const targets: Target[] = [
   {
+    // COG 295° → effective ≈21° → they are HIGHER + faster = RED THREAT
     mmsi: "338123456",
     name: "Ohana",
     distance: 0.42,
     bearing: 318,
     closingRate: -0.008,
-    sog: 6.8,
-    cog: 308,
-    effectiveWindAngle: 46,
-    isHigher: true,
-    isFaster: true,
+    sog: 8.1,
+    cog: 295,
+    effectiveWindAngle: 21,
+    isHigher: false,   // they are higher (their TWA 21° < our 38°)
+    isFaster: false,   // they are faster
     distanceHistory: [0.61, 0.58, 0.55, 0.52, 0.50, 0.48, 0.46, 0.44, 0.43, 0.42],
   },
   {
+    // COG 336° → effective ≈62° → we are HIGHER + faster = GREEN WIN
     mmsi: "338654321",
     name: "Paradigm Shift",
     distance: 0.78,
     bearing: 295,
     closingRate: 0.003,
-    sog: 7.5,
-    cog: 319,
-    effectiveWindAngle: 33,
-    isHigher: false,
-    isFaster: false,
+    sog: 6.4,
+    cog: 336,
+    effectiveWindAngle: 62,
+    isHigher: true,    // we are higher (our 38° < their 62°)
+    isFaster: true,    // we are faster
     distanceHistory: [0.71, 0.72, 0.73, 0.74, 0.75, 0.75, 0.76, 0.77, 0.78, 0.78],
   },
   {
+    // COG 296° → effective ≈22° → they higher, but we faster = YELLOW MIXED
     mmsi: "338789012",
     name: "Success",
     distance: 1.14,
     bearing: 340,
     closingRate: -0.014,
-    sog: 6.5,
-    cog: 305,
-    effectiveWindAngle: 51,
-    isHigher: true,
-    isFaster: true,
+    sog: 6.9,
+    cog: 296,
+    effectiveWindAngle: 22,
+    isHigher: false,   // they higher
+    isFaster: true,    // we faster
     distanceHistory: [1.28, 1.25, 1.23, 1.21, 1.20, 1.18, 1.17, 1.16, 1.15, 1.14],
   },
   {
+    // COG 332° → effective ≈58° → we higher, they faster = YELLOW MIXED
     mmsi: "338345678",
     name: "MASKWA",
     distance: 1.56,
     bearing: 271,
     closingRate: 0.011,
-    sog: 7.8,
-    cog: 325,
-    effectiveWindAngle: 31,
-    isHigher: false,
-    isFaster: false,
+    sog: 7.9,
+    cog: 332,
+    effectiveWindAngle: 58,
+    isHigher: true,    // we higher
+    isFaster: false,   // they faster
     distanceHistory: [1.45, 1.47, 1.48, 1.49, 1.50, 1.51, 1.52, 1.53, 1.55, 1.56],
   },
 ];

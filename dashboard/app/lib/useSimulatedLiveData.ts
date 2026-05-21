@@ -82,7 +82,7 @@ export function useSimulatedLiveData() {
       // Move competitors and recalculate tactical metrics
       const prevTargets = targetsRef.current;
       const newTargets = prevTargets.map((t) => {
-        const tCog = t.cog + jitter(0, 2);
+        const tCog = t.cog + jitter(0, 0.5);
         const tSog = Math.max(4, Math.min(10, t.sog + jitter(0, 0.15)));
         const [tLat, tLon] = moveBoat(t.lat, t.lon, tCog, tSog, dt);
 

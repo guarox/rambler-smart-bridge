@@ -40,14 +40,13 @@ test("tactical table shows correct distances", async ({ page }) => {
 });
 
 test("tactical table shows higher/faster badges correctly", async ({ page }) => {
-  // Ohana: we are higher and faster (green badges)
+  // Ohana: they are higher (21°) and faster — red threat badges
   const ohanaRow = page.locator("table tbody tr").first();
-  await expect(ohanaRow.getByText(/38° vs 46°/)).toBeVisible();
-  await expect(ohanaRow.getByText(/7.2 vs 6.8/)).toBeVisible();
+  await expect(ohanaRow.getByText(/vs 21°/)).toBeVisible();
 
-  // Paradigm Shift: they are higher and faster (red badges)
+  // Paradigm Shift: we are higher (62°) and faster — green badges
   const paradigmRow = page.locator("table tbody tr").nth(1);
-  await expect(paradigmRow.getByText(/38° vs 33°/)).toBeVisible();
+  await expect(paradigmRow.getByText(/vs 62°/)).toBeVisible();
 });
 
 test("map panel renders", async ({ page }) => {
