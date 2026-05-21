@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import type { Map as LeafletMap, Marker, Polyline, DivIcon } from "leaflet";
 import { OwnBoat, WindCell } from "../lib/mockData";
 
@@ -36,14 +36,35 @@ function windArrowSvg(speed: number, dir: number, isActual = false): string {
   </svg>`;
 }
 
-function boatSvg(color: string, label: string, cog: number): string {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="-30 -30 60 60">
+function boatSvg(color: string, label: string, cog: number, isOwn = false): string {
+  const size = isOwn ? 70 : 60;
+  const half = size / 2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="-${half} -${half} ${size} ${size}">
     <g transform="rotate(${cog})">
-      <polygon points="0,-12 -6,10 0,6 6,10" fill="${color}" stroke="white" stroke-width="1"/>
+      <polygon points="0,-14 -7,12 0,7 7,12" fill="${color}" stroke="white" stroke-width="${isOwn ? 2 : 1}"/>
+      ${isOwn ? `<circle r="4" fill="white" opacity="0.9"/>` : ""}
     </g>
-    <text y="26" text-anchor="middle" font-size="9" fill="white" font-family="sans-serif"
+    <text y="${half - 4}" text-anchor="middle" font-size="${isOwn ? 10 : 9}" fill="white" font-family="sans-serif"
       style="text-shadow:0 0 3px #000,0 0 3px #000">${label}</text>
   </svg>`;
+}
+
+// Project a lat/lon point at bearing+distance (nm)
+function projectPoint(lat: number, lon: number, bearingDeg: number, distNm: number): [number, number] {
+  const R = 3440.065;
+  const d = distNm / R;
+  const lat1 = (lat * Math.PI) / 180;
+  const lon1 = (lon * Math.PI) / 180;
+  const b = (bearingDeg * Math.PI) / 180;
+  const lat2 = Math.asin(Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(b));
+  const lon2 = lon1 + Math.atan2(Math.sin(b) * Math.sin(d) * Math.cos(lat1), Math.cos(d) - Math.sin(lat1) * Math.sin(lat2));
+  return [(lat2 * 180) / Math.PI, (lon2 * 180) / Math.PI];
+}
+
+function competitorColor(closingRate: number): string {
+  if (closingRate < -0.05) return "#22c55e";  // closing = green
+  if (closingRate > 0.05) return "#ef4444";   // opening = red
+  return "#facc15";                            // steady = yellow
 }
 
 export default function RaceMap({ boat, targets, windGrid }: Props) {
@@ -53,8 +74,12 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
   const ramblerTrailRef = useRef<Polyline | null>(null);
   const targetMarkersRef = useRef<Map<string, Marker>>(new Map());
   const targetTrailsRef = useRef<Map<string, Polyline>>(new Map());
+  const bearingLinesRef = useRef<Map<string, Polyline>>(new Map());
+  const laylinePortRef = useRef<Polyline | null>(null);
+  const laylineStbdRef = useRef<Polyline | null>(null);
   const windMarkersRef = useRef<Marker[]>([]);
   const actualWindMarkerRef = useRef<Marker | null>(null);
+  const [showLaylines, setShowLaylines] = React.useState(true);
 
   // Initialize map once
   useEffect(() => {
@@ -85,23 +110,38 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
         { attribution: "", maxZoom: 16, opacity: 0.9 }
       ).addTo(map);
 
+      // Laylines (port = red dashed, starboard = green dashed)
+      const portEnd = projectPoint(boat.lat, boat.lon, (boat.twd + boat.twa + 360) % 360, 3);
+      const stbdEnd = projectPoint(boat.lat, boat.lon, (boat.twd - boat.twa + 360) % 360, 3);
+      laylinePortRef.current = L.polyline([[boat.lat, boat.lon], portEnd], {
+        color: "#f87171", weight: 1.5, opacity: 0.8, dashArray: "6 4",
+      }).addTo(map);
+      laylineStbdRef.current = L.polyline([[boat.lat, boat.lon], stbdEnd], {
+        color: "#86efac", weight: 1.5, opacity: 0.8, dashArray: "6 4",
+      }).addTo(map);
+
       // Rambler trail
       ramblerTrailRef.current = L.polyline([[boat.lat, boat.lon]], {
         color: "#22c55e", weight: 2, opacity: 0.7, dashArray: "4 4",
       }).addTo(map);
 
-      // Rambler
+      // Rambler — larger, white dot center, thicker stroke
       ramblerMarkerRef.current = L.marker([boat.lat, boat.lon], {
-        icon: makeIcon(boatSvg("#22c55e", "Rambler", boat.cog), 60),
+        icon: makeIcon(boatSvg("#22c55e", "Rambler", boat.cog, true), 70),
         zIndexOffset: 1000,
       }).addTo(map).bindPopup(`<b>Rambler USA 99</b><br>SOG: ${boat.sog.toFixed(1)} kts · COG: ${Math.round(boat.cog)}° · TWA: ${Math.round(boat.twa)}°`);
 
-      // Competitor markers + trails
+      // Competitor markers + trails + bearing lines
       targets.forEach((t) => {
-        // Red = threat (they beat us on both), yellow = mixed, green = we're winning
-        const color = !t.isHigher && !t.isFaster ? "#ef4444" : t.isHigher && t.isFaster ? "#22c55e" : "#facc15";
+        const color = competitorColor(t.closingRate);
 
-        // Trail first (renders under marker)
+        // Bearing line from Rambler to target
+        const bl = L.polyline([[boat.lat, boat.lon], [t.lat, t.lon]], {
+          color, weight: 1, opacity: 0.4, dashArray: "3 5",
+        }).addTo(map);
+        bearingLinesRef.current.set(t.mmsi, bl);
+
+        // Trail (renders under marker)
         const trail = L.polyline([[t.lat, t.lon]], {
           color, weight: 2, opacity: 0.6, dashArray: "4 4",
         }).addTo(map);
@@ -109,7 +149,7 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
 
         const m = L.marker([t.lat, t.lon], { icon: makeIcon(boatSvg(color, t.name, t.cog), 60) })
           .addTo(map)
-          .bindPopup(`<b>${t.name}</b><br>SOG: ${t.sog.toFixed(1)} kts · Dist: ${t.distance.toFixed(2)} nm<br>${t.closingRate < 0 ? "▼ Closing" : "▲ Opening"} · ${t.isHigher ? "We higher" : "They higher"} · ${t.isFaster ? "We faster" : "They faster"}`);
+          .bindPopup(`<b>${t.name}</b><br>SOG: ${t.sog.toFixed(1)} kts · Dist: ${t.distance.toFixed(2)} nm · Bearing: ${Math.round(t.bearing)}°<br>${t.closingRate < 0 ? "▼ Closing" : "▲ Opening"} ${Math.abs(t.closingRate).toFixed(2)} nm/hr<br>${t.isHigher ? "We higher" : "They higher"} · ${t.isFaster ? "We faster" : "They faster"}`);
         targetMarkersRef.current.set(t.mmsi, m);
       });
 
@@ -144,31 +184,41 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
       const makeIcon = (svg: string, size: number): DivIcon =>
         L.divIcon({ html: svg, className: "", iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
 
+      // Update laylines
+      const portEnd = projectPoint(boat.lat, boat.lon, (boat.twd + (boat as any).twa + 360) % 360, 3);
+      const stbdEnd = projectPoint(boat.lat, boat.lon, (boat.twd - (boat as any).twa + 360) % 360, 3);
+      laylinePortRef.current?.setLatLngs([[boat.lat, boat.lon], portEnd]);
+      laylineStbdRef.current?.setLatLngs([[boat.lat, boat.lon], stbdEnd]);
+
       // Update Rambler marker + trail
       if (ramblerMarkerRef.current) {
         ramblerMarkerRef.current
           .setLatLng([boat.lat, boat.lon])
-          .setIcon(makeIcon(boatSvg("#22c55e", "Rambler", boat.cog), 60))
+          .setIcon(makeIcon(boatSvg("#22c55e", "Rambler", boat.cog, true), 70))
           .setPopupContent(`<b>Rambler USA 99</b><br>SOG: ${boat.sog.toFixed(1)} kts · COG: ${Math.round(boat.cog)}° · TWA: ${Math.round(boat.twa)}°`);
       }
       if (ramblerTrailRef.current && (boat as any).trail) {
         ramblerTrailRef.current.setLatLngs((boat as any).trail);
       }
 
-      // Update competitors + trails
+      // Update competitors + trails + bearing lines
       targets.forEach((t) => {
-        // Red = threat (they beat us on both), yellow = mixed, green = we're winning
-        const color = !t.isHigher && !t.isFaster ? "#ef4444" : t.isHigher && t.isFaster ? "#22c55e" : "#facc15";
+        const color = competitorColor(t.closingRate);
         const m = targetMarkersRef.current.get(t.mmsi);
         if (m) {
           m.setLatLng([t.lat, t.lon])
             .setIcon(makeIcon(boatSvg(color, t.name, t.cog), 60))
-            .setPopupContent(`<b>${t.name}</b><br>SOG: ${t.sog.toFixed(1)} kts · Dist: ${t.distance.toFixed(2)} nm<br>${t.closingRate < 0 ? "▼ Closing" : "▲ Opening"} · ${t.isHigher ? "We higher" : "They higher"} · ${t.isFaster ? "We faster" : "They faster"}`);
+            .setPopupContent(`<b>${t.name}</b><br>SOG: ${t.sog.toFixed(1)} kts · Dist: ${t.distance.toFixed(2)} nm · Bearing: ${Math.round(t.bearing)}°<br>${t.closingRate < 0 ? "▼ Closing" : "▲ Opening"} ${Math.abs(t.closingRate).toFixed(2)} nm/hr<br>${t.isHigher ? "We higher" : "They higher"} · ${t.isFaster ? "We faster" : "They faster"}`);
         }
         const trail = targetTrailsRef.current.get(t.mmsi);
         if (trail && t.trail) {
           trail.setLatLngs(t.trail);
           trail.setStyle({ color });
+        }
+        const bl = bearingLinesRef.current.get(t.mmsi);
+        if (bl) {
+          bl.setLatLngs([[boat.lat, boat.lon], [t.lat, t.lon]]);
+          bl.setStyle({ color });
         }
       });
 
@@ -188,22 +238,36 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
     });
   }, [boat, targets, windGrid]);
 
+  // Show/hide laylines when toggle changes
+  useEffect(() => {
+    if (!laylinePortRef.current || !laylineStbdRef.current) return;
+    const opacity = showLaylines ? 0.8 : 0;
+    laylinePortRef.current.setStyle({ opacity });
+    laylineStbdRef.current.setStyle({ opacity });
+  }, [showLaylines]);
+
   return (
     <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Race Chart</h2>
-        <div className="flex gap-4 text-xs flex-wrap">
-          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-green-500"></span>Rambler</span>
-          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-red-500"></span>Threat</span>
-          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-yellow-400"></span>Mixed</span>
-          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-green-400"></span>We winning</span>
-          <span className="flex items-center gap-1 text-yellow-400">▲ HRRR</span>
-          <span className="flex items-center gap-1 text-blue-400">▲ B&G</span>
+        <div className="flex items-center gap-3 text-xs flex-wrap">
+          <button
+            onClick={() => setShowLaylines(v => !v)}
+            className={`px-2 py-0.5 rounded border text-xs font-mono transition-colors ${showLaylines ? "border-white/40 text-white bg-white/10" : "border-gray-600 text-gray-500"}`}
+          >
+            Laylines {showLaylines ? "ON" : "OFF"}
+          </button>
+          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-green-500 border-2 border-white"></span>Rambler</span>
+          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-green-500"></span>Closing</span>
+          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-red-500"></span>Opening</span>
+          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-yellow-400"></span>Steady</span>
+          <span className="flex items-center gap-1 text-red-300">— Port</span>
+          <span className="flex items-center gap-1 text-green-300">— Stbd</span>
         </div>
       </div>
       <div ref={containerRef} className="rounded-lg overflow-hidden" style={{ height: "480px" }} />
       <p className="text-xs text-gray-600 mt-2">
-        Esri Ocean Basemap · Arrows point downwind · Yellow = HRRR model · Blue = B&G actual · Boats update every 2s · Click for details
+        Esri Ocean Basemap · Colors = closing rate · Laylines from TWD ± TWA · Click boats for details
       </p>
     </div>
   );

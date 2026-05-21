@@ -47,6 +47,7 @@ export interface TargetState extends Target {
 export function useSimulatedLiveData() {
   const [boat, setBoat] = useState<OwnBoat>({ ...seedBoat });
   const [boatTrail, setBoatTrail] = useState<[number, number][]>([[seedBoat.lat, seedBoat.lon]]);
+  const [twdHistory, setTwdHistory] = useState<number[]>([seedBoat.twd]);
   const [targets, setTargets] = useState<TargetState[]>(
     seedTargets.map((t) => {
       const [lat, lon] = destPoint(seedBoat.lat, seedBoat.lon, t.bearing, t.distance);
@@ -107,11 +108,12 @@ export function useSimulatedLiveData() {
 
       setBoat(newBoat);
       setBoatTrail(newBoatTrail);
+      setTwdHistory(prev => [...prev.slice(-14), newTwd]); // keep 15 values = 30s
       setTargets(newTargets);
     }, UPDATE_MS);
 
     return () => clearInterval(interval);
   }, []);
 
-  return { boat, boatTrail, targets, windGrid };
+  return { boat, boatTrail, targets, windGrid, twdHistory };
 }

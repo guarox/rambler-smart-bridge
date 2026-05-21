@@ -36,6 +36,23 @@ export const ownBoat: OwnBoat = {
   lon: -87.380,
 };
 
+// J/99 polar target BSP lookup: [TWS bucket][TWA bucket] → target kts
+// TWS buckets: <10, 10-14, 14-18, ≥18
+// TWA buckets: 30°, 40°, 50°, 60°, 70°, 90°, 120°, 150°, 170°
+export const j99Polar: Record<string, Record<number, number>> = {
+  light:  { 30: 4.8, 40: 5.6, 50: 6.1, 60: 6.4, 70: 6.6, 90: 6.5, 120: 7.2, 150: 6.8, 170: 5.9 },
+  medium: { 30: 6.1, 40: 7.2, 50: 7.8, 60: 8.0, 70: 8.1, 90: 8.0, 120: 8.8, 150: 8.4, 170: 7.2 },
+  fresh:  { 30: 6.8, 40: 7.9, 50: 8.4, 60: 8.6, 70: 8.7, 90: 8.6, 120: 9.2, 150: 8.8, 170: 7.6 },
+  strong: { 30: 7.2, 40: 8.2, 50: 8.7, 60: 8.9, 70: 9.0, 90: 8.9, 120: 9.4, 150: 9.0, 170: 7.8 },
+};
+
+export function polarTarget(twsKts: number, twaDeg: number): number {
+  const band = twsKts < 10 ? "light" : twsKts < 14 ? "medium" : twsKts < 18 ? "fresh" : "strong";
+  const buckets = [30, 40, 50, 60, 70, 90, 120, 150, 170];
+  const nearest = buckets.reduce((a, b) => Math.abs(b - twaDeg) < Math.abs(a - twaDeg) ? b : a);
+  return j99Polar[band][nearest];
+}
+
 // Compute lat/lon from a reference point, bearing (deg true), and distance (nm)
 export function destPoint(lat: number, lon: number, bearingDeg: number, distNm: number): [number, number] {
   const R = 3440.065;

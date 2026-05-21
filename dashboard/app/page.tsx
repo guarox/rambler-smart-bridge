@@ -3,10 +3,11 @@ import OwnBoatPanel from "./components/OwnBoatPanel";
 import TacticalTable from "./components/TacticalTable";
 import WindOverlayPanel from "./components/WindOverlayPanel";
 import RaceMapLoader from "./components/RaceMapLoader";
+import PerformancePanel from "./components/PerformancePanel";
 import { useSimulatedLiveData } from "./lib/useSimulatedLiveData";
 
 export default function Home() {
-  const { boat, boatTrail, targets, windGrid } = useSimulatedLiveData();
+  const { boat, boatTrail, targets, windGrid, twdHistory } = useSimulatedLiveData();
   const boatWithTrail = { ...boat, trail: boatTrail };
 
   return (
@@ -22,6 +23,7 @@ export default function Home() {
       </div>
 
       <OwnBoatPanel boat={boat} />
+      <PerformancePanel boat={boat} twdHistory={twdHistory} />
       <RaceMapLoader boat={boatWithTrail} targets={targets} windGrid={windGrid} />
       <TacticalTable targets={targets} boat={boat} />
       <WindOverlayPanel boat={boat} windGrid={windGrid} />
