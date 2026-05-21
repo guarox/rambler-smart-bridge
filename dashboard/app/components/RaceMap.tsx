@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useRef } from "react";
-import type { Map as LeafletMap, Marker, Polyline, DivIcon } from "leaflet";
+import type { Map as LeafletMap, Marker, Polyline, Circle, DivIcon } from "leaflet";
 import { OwnBoat, WindCell } from "../lib/mockData";
 
 interface TargetLive {
@@ -62,6 +62,23 @@ function projectPoint(lat: number, lon: number, bearingDeg: number, distNm: numb
   return [(lat2 * 180) / Math.PI, (lon2 * 180) / Math.PI];
 }
 
+function haversineNm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 3440.065;
+  const toRad = (x: number) => (x * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * Math.asin(Math.sqrt(a)) * R;
+}
+
+function bearingBetween(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const toRad = (x: number) => (x * Math.PI) / 180;
+  const dLon = toRad(lon2 - lon1);
+  const y = Math.sin(dLon) * Math.cos(toRad(lat2));
+  const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) - Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+}
+
 function competitorColor(closingRate: number): string {
   if (closingRate < -0.05) return "#22c55e";  // closing = green
   if (closingRate > 0.05) return "#ef4444";   // opening = red
@@ -81,6 +98,12 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
   const windMarkersRef = useRef<Marker[]>([]);
   const actualWindMarkerRef = useRef<Marker | null>(null);
   const [showLaylines, setShowLaylines] = React.useState(true);
+  const [showRings, setShowRings] = React.useState(false);
+  const [rulerActive, setRulerActive] = React.useState(false);
+  const rangeRingsRef = useRef<Circle[]>([]);
+  const rulerStartRef = useRef<[number, number] | null>(null);
+  const rulerLineRef = useRef<Polyline | null>(null);
+  const rulerMarkersRef = useRef<Marker[]>([]);
 
   // Initialize map once
   useEffect(() => {
@@ -169,6 +192,18 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
         interactive: false,
         zIndexOffset: 500,
       }).addTo(map);
+
+      // Range rings at 0.5, 1, 2 nm — hidden by default
+      const RING_NM = [0.5, 1.0, 2.0];
+      RING_NM.forEach((nm) => {
+        const ring = L.circle([boat.lat, boat.lon], {
+          radius: nm * 1852,
+          color: "#94a3b8", weight: 1, opacity: 0, fillOpacity: 0, dashArray: "4 4",
+          interactive: false,
+        }).addTo(map);
+        ring.bindTooltip(`${nm} nm`, { permanent: false, direction: "top" });
+        rangeRingsRef.current.push(ring);
+      });
     });
 
     return () => {
@@ -236,6 +271,9 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
           .setLatLng([boat.lat, boat.lon - 0.01])
           .setIcon(makeIcon(windArrowSvg(boat.tws, boat.twd, true), 40));
       }
+
+      // Update range ring centers
+      rangeRingsRef.current.forEach(ring => ring.setLatLng([boat.lat, boat.lon]));
     });
   }, [boat, targets, windGrid]);
 
@@ -246,6 +284,78 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
     laylinePortRef.current.setStyle({ opacity });
     laylineStbdRef.current.setStyle({ opacity });
   }, [showLaylines]);
+
+  // Show/hide range rings
+  useEffect(() => {
+    rangeRingsRef.current.forEach(ring => ring.setStyle({ opacity: showRings ? 0.7 : 0 }));
+  }, [showRings]);
+
+  // Ruler tool — click-to-measure
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const clearRuler = () => {
+      rulerLineRef.current?.remove();
+      rulerLineRef.current = null;
+      rulerMarkersRef.current.forEach(m => m.remove());
+      rulerMarkersRef.current = [];
+      rulerStartRef.current = null;
+    };
+
+    if (!rulerActive) { clearRuler(); return; }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleClick = (e: any) => {
+      const { lat, lng } = e.latlng;
+
+      import("leaflet").then((L) => {
+        if (!rulerStartRef.current) {
+          // First click — anchor point
+          rulerStartRef.current = [lat, lng];
+          const dot = L.circleMarker([lat, lng], {
+            radius: 5, color: "#fff", fillColor: "#fff", fillOpacity: 1, weight: 2,
+          }).addTo(map);
+          rulerMarkersRef.current.push(dot as unknown as Marker);
+        } else {
+          // Second click — measure
+          const [sLat, sLon] = rulerStartRef.current;
+          const dist = haversineNm(sLat, sLon, lat, lng);
+          const brg = bearingBetween(sLat, sLon, lat, lng);
+          const midLat = (sLat + lat) / 2;
+          const midLon = (sLon + lng) / 2;
+
+          rulerLineRef.current?.remove();
+          rulerLineRef.current = L.polyline([[sLat, sLon], [lat, lng]], {
+            color: "#fff", weight: 2, dashArray: "6 4", opacity: 0.9,
+          }).addTo(map);
+
+          const endDot = L.circleMarker([lat, lng], {
+            radius: 5, color: "#fff", fillColor: "#fff", fillOpacity: 1, weight: 2,
+          }).addTo(map);
+
+          const label = L.marker([midLat, midLon], {
+            icon: L.divIcon({
+              html: `<div style="background:#0f172a;border:1px solid #e2e8f0;border-radius:4px;padding:3px 8px;white-space:nowrap;font-size:12px;font-family:monospace;color:#f1f5f9;font-weight:bold">${dist.toFixed(2)} nm · ${Math.round(brg)}°T</div>`,
+              className: "",
+              iconAnchor: [-4, 10],
+            }),
+          }).addTo(map);
+
+          rulerMarkersRef.current.push(endDot as unknown as Marker, label);
+          // Reset so next click starts a fresh measurement
+          rulerStartRef.current = null;
+          rulerMarkersRef.current = rulerMarkersRef.current.filter(m => m === endDot || m === label);
+        }
+      });
+    };
+
+    map.on("click", handleClick);
+    return () => {
+      map.off("click", handleClick);
+      clearRuler();
+    };
+  }, [rulerActive]);
 
   const fitFleet = React.useCallback(() => {
     if (!mapRef.current) return;
@@ -274,13 +384,25 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
           >
             Laylines {showLaylines ? "ON" : "OFF"}
           </button>
+          <button
+            onClick={() => setShowRings(v => !v)}
+            className={`px-2 py-0.5 rounded border text-xs font-mono transition-colors ${showRings ? "border-white/40 text-white bg-white/10" : "border-gray-600 text-gray-500"}`}
+          >
+            ◎ Rings {showRings ? "ON" : "OFF"}
+          </button>
+          <button
+            onClick={() => setRulerActive(v => !v)}
+            className={`px-2 py-0.5 rounded border text-xs font-mono transition-colors ${rulerActive ? "border-yellow-400/60 text-yellow-300 bg-yellow-900/20" : "border-gray-600 text-gray-500"}`}
+          >
+            📏 Ruler {rulerActive ? "— click to measure" : "OFF"}
+          </button>
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-green-500 border-2 border-white inline-block"></span>Rambler</span>
           <span className="flex items-center gap-1 text-green-400">● Closing</span>
           <span className="flex items-center gap-1 text-red-400">● Opening</span>
           <span className="flex items-center gap-1 text-yellow-400">● Steady</span>
         </div>
       </div>
-      <div ref={containerRef} className="rounded-lg overflow-hidden" style={{ height: "480px" }} />
+      <div ref={containerRef} className="rounded-lg overflow-hidden" style={{ height: "480px", cursor: rulerActive ? "crosshair" : undefined }} />
     </div>
   );
 }
