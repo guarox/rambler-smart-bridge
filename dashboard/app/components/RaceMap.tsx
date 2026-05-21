@@ -38,10 +38,14 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
   const mapRef = useRef<Map | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
+    const container = containerRef.current;
+    if (!container || mapRef.current) return;
+    let cancelled = false;
 
-    // Leaflet must be imported client-side only
     import("leaflet").then((L) => {
+      if (cancelled || mapRef.current) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((container as any)._leaflet_id) return;
       // Fix default icon paths broken by webpack
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -51,7 +55,7 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
         shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
       });
 
-      const map = L.map(containerRef.current!, {
+      const map = L.map(container, {
         center: [boat.lat, boat.lon],
         zoom: 13,
         zoomControl: true,
@@ -113,6 +117,7 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
     });
 
     return () => {
+      cancelled = true;
       mapRef.current?.remove();
       mapRef.current = null;
     };
