@@ -36,24 +36,30 @@ function jitter(val: number, range: number): number {
   return val + (Math.random() - 0.5) * range;
 }
 
-interface TargetState extends Target {
+const TRAIL_MAX = 60; // keep last 60 positions = 2 minutes at 2s updates
+
+export interface TargetState extends Target {
   lat: number;
   lon: number;
+  trail: [number, number][];
 }
 
 export function useSimulatedLiveData() {
   const [boat, setBoat] = useState<OwnBoat>({ ...seedBoat });
+  const [boatTrail, setBoatTrail] = useState<[number, number][]>([[seedBoat.lat, seedBoat.lon]]);
   const [targets, setTargets] = useState<TargetState[]>(
     seedTargets.map((t) => {
       const [lat, lon] = destPoint(seedBoat.lat, seedBoat.lon, t.bearing, t.distance);
-      return { ...t, lat, lon };
+      return { ...t, lat, lon, trail: [[lat, lon]] };
     })
   );
   const [windGrid, setWindGrid] = useState<WindCell[]>(baseGrid);
 
   const boatRef = useRef(boat);
+  const boatTrailRef = useRef(boatTrail);
   const targetsRef = useRef(targets);
   boatRef.current = boat;
+  boatTrailRef.current = boatTrail;
   targetsRef.current = targets;
 
   useEffect(() => {
@@ -71,6 +77,7 @@ export function useSimulatedLiveData() {
       const [newLat, newLon] = moveBoat(prev.lat, prev.lon, newCog, newSog, dt);
 
       const newBoat: OwnBoat = { ...prev, lat: newLat, lon: newLon, cog: newCog, sog: newSog, bsp: newBsp, tws: newTws, twd: newTwd, twa: newTwa };
+      const newBoatTrail = [...boatTrailRef.current.slice(-TRAIL_MAX + 1), [newLat, newLon] as [number, number]];
 
       // Move competitors and recalculate tactical metrics
       const prevTargets = targetsRef.current;
@@ -91,18 +98,20 @@ export function useSimulatedLiveData() {
 
         const history = [...t.distanceHistory.slice(1), parseFloat(dist.toFixed(2))];
 
-        return { ...t, lat: tLat, lon: tLon, cog: tCog, sog: tSog, distance: dist, bearing, closingRate, effectiveWindAngle: Math.round(normalised), isHigher, isFaster, distanceHistory: history };
+        const newTrail = [...t.trail.slice(-TRAIL_MAX + 1), [tLat, tLon] as [number, number]];
+        return { ...t, lat: tLat, lon: tLon, cog: tCog, sog: tSog, distance: dist, bearing, closingRate, effectiveWindAngle: Math.round(normalised), isHigher, isFaster, distanceHistory: history, trail: newTrail };
       });
 
       // Shift HRRR grid slightly
       setWindGrid((prev) => prev.map((cell) => ({ ...cell, speed: Math.max(8, Math.min(22, cell.speed + jitter(0, 0.2))), dir: cell.dir + jitter(0, 0.5) })));
 
       setBoat(newBoat);
+      setBoatTrail(newBoatTrail);
       setTargets(newTargets);
     }, UPDATE_MS);
 
     return () => clearInterval(interval);
   }, []);
 
-  return { boat, targets, windGrid };
+  return { boat, boatTrail, targets, windGrid };
 }

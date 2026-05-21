@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import type { Map as LeafletMap, Marker, DivIcon } from "leaflet";
+import type { Map as LeafletMap, Marker, Polyline, DivIcon } from "leaflet";
 import { OwnBoat, WindCell } from "../lib/mockData";
 
 interface TargetLive {
@@ -15,10 +15,11 @@ interface TargetLive {
   isHigher: boolean;
   isFaster: boolean;
   twa?: number;
+  trail?: [number, number][];
 }
 
 interface Props {
-  boat: OwnBoat;
+  boat: OwnBoat & { trail?: [number, number][] };
   targets: TargetLive[];
   windGrid: WindCell[];
 }
@@ -49,7 +50,9 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const ramblerMarkerRef = useRef<Marker | null>(null);
+  const ramblerTrailRef = useRef<Polyline | null>(null);
   const targetMarkersRef = useRef<Map<string, Marker>>(new Map());
+  const targetTrailsRef = useRef<Map<string, Polyline>>(new Map());
   const windMarkersRef = useRef<Marker[]>([]);
   const actualWindMarkerRef = useRef<Marker | null>(null);
 
@@ -81,15 +84,27 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
         opacity: 0.85, maxZoom: 18, attribution: "© OpenSeaMap",
       }).addTo(map);
 
+      // Rambler trail
+      ramblerTrailRef.current = L.polyline([[boat.lat, boat.lon]], {
+        color: "#22c55e", weight: 2, opacity: 0.7, dashArray: "4 4",
+      }).addTo(map);
+
       // Rambler
       ramblerMarkerRef.current = L.marker([boat.lat, boat.lon], {
         icon: makeIcon(boatSvg("#22c55e", "Rambler", boat.cog), 60),
         zIndexOffset: 1000,
       }).addTo(map).bindPopup(`<b>Rambler USA 99</b><br>SOG: ${boat.sog.toFixed(1)} kts · COG: ${Math.round(boat.cog)}° · TWA: ${Math.round(boat.twa)}°`);
 
-      // Competitor markers
+      // Competitor markers + trails
       targets.forEach((t) => {
         const color = t.isHigher && t.isFaster ? "#f97316" : t.isHigher || t.isFaster ? "#facc15" : "#94a3b8";
+
+        // Trail first (renders under marker)
+        const trail = L.polyline([[t.lat, t.lon]], {
+          color, weight: 2, opacity: 0.6, dashArray: "4 4",
+        }).addTo(map);
+        targetTrailsRef.current.set(t.mmsi, trail);
+
         const m = L.marker([t.lat, t.lon], { icon: makeIcon(boatSvg(color, t.name, t.cog), 60) })
           .addTo(map)
           .bindPopup(`<b>${t.name}</b><br>SOG: ${t.sog.toFixed(1)} kts · Dist: ${t.distance.toFixed(2)} nm<br>${t.closingRate < 0 ? "▼ Closing" : "▲ Opening"} · ${t.isHigher ? "We higher" : "They higher"} · ${t.isFaster ? "We faster" : "They faster"}`);
@@ -127,22 +142,30 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
       const makeIcon = (svg: string, size: number): DivIcon =>
         L.divIcon({ html: svg, className: "", iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
 
-      // Update Rambler
+      // Update Rambler marker + trail
       if (ramblerMarkerRef.current) {
         ramblerMarkerRef.current
           .setLatLng([boat.lat, boat.lon])
           .setIcon(makeIcon(boatSvg("#22c55e", "Rambler", boat.cog), 60))
           .setPopupContent(`<b>Rambler USA 99</b><br>SOG: ${boat.sog.toFixed(1)} kts · COG: ${Math.round(boat.cog)}° · TWA: ${Math.round(boat.twa)}°`);
       }
+      if (ramblerTrailRef.current && (boat as any).trail) {
+        ramblerTrailRef.current.setLatLngs((boat as any).trail);
+      }
 
-      // Update competitors
+      // Update competitors + trails
       targets.forEach((t) => {
+        const color = t.isHigher && t.isFaster ? "#f97316" : t.isHigher || t.isFaster ? "#facc15" : "#94a3b8";
         const m = targetMarkersRef.current.get(t.mmsi);
         if (m) {
-          const color = t.isHigher && t.isFaster ? "#f97316" : t.isHigher || t.isFaster ? "#facc15" : "#94a3b8";
           m.setLatLng([t.lat, t.lon])
             .setIcon(makeIcon(boatSvg(color, t.name, t.cog), 60))
             .setPopupContent(`<b>${t.name}</b><br>SOG: ${t.sog.toFixed(1)} kts · Dist: ${t.distance.toFixed(2)} nm<br>${t.closingRate < 0 ? "▼ Closing" : "▲ Opening"} · ${t.isHigher ? "We higher" : "They higher"} · ${t.isFaster ? "We faster" : "They faster"}`);
+        }
+        const trail = targetTrailsRef.current.get(t.mmsi);
+        if (trail && t.trail) {
+          trail.setLatLngs(t.trail);
+          trail.setStyle({ color });
         }
       });
 

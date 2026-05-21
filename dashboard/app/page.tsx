@@ -6,7 +6,8 @@ import RaceMapLoader from "./components/RaceMapLoader";
 import { useSimulatedLiveData } from "./lib/useSimulatedLiveData";
 
 export default function Home() {
-  const { boat, targets, windGrid } = useSimulatedLiveData();
+  const { boat, boatTrail, targets, windGrid } = useSimulatedLiveData();
+  const boatWithTrail = { ...boat, trail: boatTrail };
 
   return (
     <main className="min-h-screen bg-gray-950 text-white p-4 space-y-4">
@@ -21,7 +22,7 @@ export default function Home() {
       </div>
 
       <OwnBoatPanel boat={boat} />
-      <RaceMapLoader boat={boat} targets={targets} windGrid={windGrid} />
+      <RaceMapLoader boat={boatWithTrail} targets={targets} windGrid={windGrid} />
       <TacticalTable targets={targets} boat={boat} />
       <WindOverlayPanel boat={boat} windGrid={windGrid} />
 
