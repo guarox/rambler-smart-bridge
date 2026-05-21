@@ -1,10 +1,13 @@
+"use client";
 import OwnBoatPanel from "./components/OwnBoatPanel";
 import TacticalTable from "./components/TacticalTable";
 import WindOverlayPanel from "./components/WindOverlayPanel";
 import RaceMapLoader from "./components/RaceMapLoader";
-import { ownBoat, targets, hrrGrid } from "./lib/mockData";
+import { useSimulatedLiveData } from "./lib/useSimulatedLiveData";
 
 export default function Home() {
+  const { boat, targets, windGrid } = useSimulatedLiveData();
+
   return (
     <main className="min-h-screen bg-gray-950 text-white p-4 space-y-4">
       <div className="flex items-center justify-between">
@@ -13,17 +16,17 @@ export default function Home() {
           <p className="text-xs text-gray-500 mt-0.5">J/99 · USA 99 · MMSI 338380946 · PHRF Spinnaker 1</p>
         </div>
         <div className="text-right">
-          <div className="text-xs text-yellow-500 font-mono">⚠ Mock Data · Preview Build</div>
+          <div className="text-xs text-green-500 font-mono">● Simulated Live · 2s updates</div>
         </div>
       </div>
 
-      <OwnBoatPanel boat={ownBoat} />
-      <RaceMapLoader boat={ownBoat} targets={targets} windGrid={hrrGrid} />
-      <TacticalTable targets={targets} boat={ownBoat} />
-      <WindOverlayPanel />
+      <OwnBoatPanel boat={boat} />
+      <RaceMapLoader boat={boat} targets={targets} windGrid={windGrid} />
+      <TacticalTable targets={targets} boat={boat} />
+      <WindOverlayPanel boat={boat} windGrid={windGrid} />
 
       <p className="text-xs text-gray-700 text-center pb-2">
-        Rambler Smart Bridge · Raspberry Pi 5 + Signal K + InfluxDB · Preview — mock data only
+        Rambler Smart Bridge · Raspberry Pi 5 + Signal K + InfluxDB · Simulated live data
       </p>
     </main>
   );

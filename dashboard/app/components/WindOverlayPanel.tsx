@@ -1,30 +1,15 @@
 "use client";
+import { OwnBoat, WindCell } from "../lib/mockData";
 
-interface WindCell {
-  lat: number;
-  lon: number;
-  speed: number;
-  dir: number;
+interface Props {
+  boat: OwnBoat;
+  windGrid: WindCell[];
 }
 
-const mockGrid: WindCell[] = [
-  { lat: 42.38, lon: -87.65, speed: 15.2, dir: 272 },
-  { lat: 42.38, lon: -87.62, speed: 14.8, dir: 270 },
-  { lat: 42.38, lon: -87.59, speed: 14.1, dir: 268 },
-  { lat: 42.36, lon: -87.65, speed: 15.5, dir: 275 },
-  { lat: 42.36, lon: -87.62, speed: 14.5, dir: 274 },  // nearest to vessel
-  { lat: 42.36, lon: -87.59, speed: 13.8, dir: 271 },
-  { lat: 42.34, lon: -87.65, speed: 16.0, dir: 278 },
-  { lat: 42.34, lon: -87.62, speed: 15.1, dir: 276 },
-  { lat: 42.34, lon: -87.59, speed: 14.3, dir: 273 },
-];
-
-const vesselActual = { speed: 14.5, dir: 274 };
-
-export default function WindOverlayPanel() {
-  const nearest = mockGrid[4];
-  const deltaSpeed = (vesselActual.speed - nearest.speed).toFixed(1);
-  const deltaDir = (vesselActual.dir - nearest.dir);
+export default function WindOverlayPanel({ boat, windGrid }: Props) {
+  const nearest = windGrid[4] ?? windGrid[0];
+  const deltaSpeed = (boat.tws - nearest.speed).toFixed(1);
+  const deltaDir = Math.round(boat.twd - nearest.dir);
 
   return (
     <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
@@ -35,7 +20,7 @@ export default function WindOverlayPanel() {
 
       {/* Grid visualization */}
       <div className="grid grid-cols-3 gap-1 mb-4">
-        {mockGrid.map((cell, i) => {
+        {windGrid.map((cell, i) => {
           const isNearest = i === 4;
           return (
             <div key={i} className={`rounded p-2 text-center ${isNearest ? "bg-blue-900 border border-blue-500" : "bg-gray-800"}`}>
@@ -57,8 +42,8 @@ export default function WindOverlayPanel() {
         </div>
         <div className="bg-gray-800 rounded-lg p-3 text-center">
           <div className="text-xs text-gray-500 uppercase mb-1">B&G Actual</div>
-          <div className="text-lg font-bold font-mono text-white">{vesselActual.speed} kts</div>
-          <div className="text-xs text-gray-500">{vesselActual.dir}° T</div>
+          <div className="text-lg font-bold font-mono text-white">{boat.tws.toFixed(1)} kts</div>
+          <div className="text-xs text-gray-500">{Math.round(boat.twd)}° T</div>
         </div>
         <div className={`rounded-lg p-3 text-center ${parseFloat(deltaSpeed) > 0 ? "bg-green-900" : "bg-red-900"}`}>
           <div className="text-xs text-gray-400 uppercase mb-1">Δ Delta</div>
