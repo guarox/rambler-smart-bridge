@@ -8,7 +8,7 @@ A Raspberry Pi 5–based system that bridges the boat's NMEA 2000 instrument net
 
 ## Live Dashboard
 
-**[rambler.vercel.app → dashboard-7gbo2i6kn-guaroxs-projects.vercel.app](https://dashboard-7gbo2i6kn-guaroxs-projects.vercel.app)**
+**[rambler99.vercel.app](https://rambler99.vercel.app)**
 
 > Currently running simulated live data. On the boat, this connects to Signal K via WebSocket.
 
@@ -151,6 +151,19 @@ cd dashboard
 npx vercel deploy --prod --scope guaroxs-projects
 ```
 
+> **Always deploy from `dashboard/`** — deploying from repo root creates a broken static project.
+
+---
+
+## CI/CD
+
+GitHub Actions (`.github/workflows/test.yml`) runs on every push to `main`:
+1. Install Node 22 + Playwright Chromium
+2. `npm run build`
+3. 8 Playwright e2e tests
+
+Test report uploaded as artifact (14-day retention). Tests cover: page load, instrument values, all 4 competitors, distances/bearings, higher/faster badges, map render, HRRR panel, zero JS errors.
+
 ---
 
 ## Tactical Intelligence — How It Works
@@ -201,6 +214,8 @@ TWS\TWA   30°    40°    50°    60°    70°    90°   120°   150°   170°
 
 ```
 rambler-smart-bridge/
+├── README.md
+├── CLAUDE.md
 ├── dashboard/                  # Next.js 16 tactical dashboard
 │   ├── app/
 │   │   ├── components/
@@ -220,9 +235,12 @@ rambler-smart-bridge/
 │   │   └── page.tsx                    # Root layout
 │   └── tests/
 │       └── dashboard.spec.ts           # 8 Playwright e2e tests
-├── rambler_system_architecture.md      # Hardware specs, procurement inventory
-├── rambler_smart_bridge_phase2.md      # Phase 2/3 engineering plan
-└── docs/                               # Reference PDFs (PICAN-M, NMEA 2000, etc.)
+├── .github/workflows/
+│   └── test.yml                        # CI: build + Playwright on every push
+└── docs/
+    ├── rambler_system_architecture.md  # Hardware specs, procurement inventory
+    ├── rambler_smart_bridge_phase2.md  # Phase 2/3 engineering plan
+    └── *.pdf                           # Reference PDFs (PICAN-M, NMEA 2000, etc.)
 ```
 
 ---
