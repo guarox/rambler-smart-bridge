@@ -32,8 +32,8 @@ export const ownBoat: OwnBoat = {
   twd: 274,
   bsp: 7.4,
   depth: 18.3,
-  lat: 42.3601,
-  lon: -87.6298,
+  lat: 41.920,   // Lake Michigan — offshore east of Chicago
+  lon: -87.380,
 };
 
 // Compute lat/lon from a reference point, bearing (deg true), and distance (nm)
@@ -56,15 +56,15 @@ export interface WindCell {
 }
 
 export const hrrGrid: WindCell[] = [
-  { lat: 42.38, lon: -87.65, speed: 15.2, dir: 272 },
-  { lat: 42.38, lon: -87.62, speed: 14.8, dir: 270 },
-  { lat: 42.38, lon: -87.59, speed: 14.1, dir: 268 },
-  { lat: 42.36, lon: -87.65, speed: 15.5, dir: 275 },
-  { lat: 42.36, lon: -87.62, speed: 14.5, dir: 274 },
-  { lat: 42.36, lon: -87.59, speed: 13.8, dir: 271 },
-  { lat: 42.34, lon: -87.65, speed: 16.0, dir: 278 },
-  { lat: 42.34, lon: -87.62, speed: 15.1, dir: 276 },
-  { lat: 42.34, lon: -87.59, speed: 14.3, dir: 273 },
+  { lat: 41.97, lon: -87.52, speed: 15.2, dir: 272 },
+  { lat: 41.97, lon: -87.38, speed: 14.8, dir: 270 },
+  { lat: 41.97, lon: -87.24, speed: 14.1, dir: 268 },
+  { lat: 41.92, lon: -87.52, speed: 15.5, dir: 275 },
+  { lat: 41.92, lon: -87.38, speed: 14.5, dir: 274 }, // nearest to vessel
+  { lat: 41.92, lon: -87.24, speed: 13.8, dir: 271 },
+  { lat: 41.87, lon: -87.52, speed: 16.0, dir: 278 },
+  { lat: 41.87, lon: -87.38, speed: 15.1, dir: 276 },
+  { lat: 41.87, lon: -87.24, speed: 14.3, dir: 273 },
 ];
 
 export const targets: Target[] = [
