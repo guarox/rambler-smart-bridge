@@ -62,7 +62,7 @@ export default function TacticalTable({ targets, boat }: { targets: Target[]; bo
         </table>
       </div>
       <p className="text-xs text-gray-600 mt-2">
-        Our TWA: {boat.twa}° · TWD: {boat.twd}° · SOG: {boat.sog} kts · Higher = tighter wind angle
+        Our TWA: {Math.round(boat.twa)}° · TWD: {Math.round(boat.twd)}° · SOG: {boat.sog.toFixed(1)} kts · Higher = tighter wind angle
       </p>
     </div>
   );
