@@ -103,7 +103,8 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
   const rangeRingsRef = useRef<Circle[]>([]);
   const rulerStartRef = useRef<[number, number] | null>(null);
   const rulerLineRef = useRef<Polyline | null>(null);
-  const rulerMarkersRef = useRef<Marker[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rulerMarkersRef = useRef<any[]>([]);
 
   // Initialize map once
   useEffect(() => {
@@ -316,7 +317,7 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
           const dot = L.circleMarker([lat, lng], {
             radius: 5, color: "#fff", fillColor: "#fff", fillOpacity: 1, weight: 2,
           }).addTo(map);
-          rulerMarkersRef.current.push(dot as unknown as Marker);
+          rulerMarkersRef.current.push(dot);
         } else {
           // Second click — measure
           const [sLat, sLon] = rulerStartRef.current;
@@ -342,7 +343,7 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
             }),
           }).addTo(map);
 
-          rulerMarkersRef.current.push(endDot as unknown as Marker, label);
+          rulerMarkersRef.current.push(endDot, label);
           // Reset so next click starts a fresh measurement
           rulerStartRef.current = null;
           rulerMarkersRef.current = rulerMarkersRef.current.filter(m => m === endDot || m === label);
