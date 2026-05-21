@@ -115,10 +115,10 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
       const portEnd = projectPoint(boat.lat, boat.lon, (boat.twd + boat.twa + 360) % 360, 3);
       const stbdEnd = projectPoint(boat.lat, boat.lon, (boat.twd - boat.twa + 360) % 360, 3);
       laylinePortRef.current = L.polyline([[boat.lat, boat.lon], portEnd], {
-        color: "#f87171", weight: 1.5, opacity: 0.8, dashArray: "6 4",
+        color: "#f87171", weight: 2.5, opacity: 0.9, dashArray: "8 5",
       }).addTo(map);
       laylineStbdRef.current = L.polyline([[boat.lat, boat.lon], stbdEnd], {
-        color: "#86efac", weight: 1.5, opacity: 0.8, dashArray: "6 4",
+        color: "#86efac", weight: 2.5, opacity: 0.9, dashArray: "8 5",
       }).addTo(map);
 
       // Rambler trail
@@ -242,34 +242,45 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
   // Show/hide laylines when toggle changes
   useEffect(() => {
     if (!laylinePortRef.current || !laylineStbdRef.current) return;
-    const opacity = showLaylines ? 0.8 : 0;
+    const opacity = showLaylines ? 0.9 : 0;
     laylinePortRef.current.setStyle({ opacity });
     laylineStbdRef.current.setStyle({ opacity });
   }, [showLaylines]);
+
+  const fitFleet = React.useCallback(() => {
+    if (!mapRef.current) return;
+    import("leaflet").then((L) => {
+      const allTargets = targetMarkersRef.current;
+      const rambler = ramblerMarkerRef.current;
+      if (!rambler) return;
+      const bounds = L.latLngBounds([rambler.getLatLng()]);
+      allTargets.forEach(m => bounds.extend(m.getLatLng()));
+      mapRef.current?.fitBounds(bounds.pad(0.3));
+    });
+  }, []);
 
   return (
     <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Race Chart</h2>
-        <div className="flex items-center gap-3 text-xs flex-wrap">
+        <div className="flex items-center gap-2 text-xs flex-wrap">
+          <button onClick={fitFleet}
+            className="px-2 py-0.5 rounded border border-gray-600 text-gray-400 hover:text-white hover:border-gray-400 transition-colors font-mono">
+            ⊕ Fit Fleet
+          </button>
           <button
             onClick={() => setShowLaylines(v => !v)}
             className={`px-2 py-0.5 rounded border text-xs font-mono transition-colors ${showLaylines ? "border-white/40 text-white bg-white/10" : "border-gray-600 text-gray-500"}`}
           >
             Laylines {showLaylines ? "ON" : "OFF"}
           </button>
-          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-green-500 border-2 border-white"></span>Rambler</span>
-          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-green-500"></span>Closing</span>
-          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-red-500"></span>Opening</span>
-          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-yellow-400"></span>Steady</span>
-          <span className="flex items-center gap-1 text-red-300">— Port</span>
-          <span className="flex items-center gap-1 text-green-300">— Stbd</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-green-500 border-2 border-white inline-block"></span>Rambler</span>
+          <span className="flex items-center gap-1 text-green-400">● Closing</span>
+          <span className="flex items-center gap-1 text-red-400">● Opening</span>
+          <span className="flex items-center gap-1 text-yellow-400">● Steady</span>
         </div>
       </div>
       <div ref={containerRef} className="rounded-lg overflow-hidden" style={{ height: "480px" }} />
-      <p className="text-xs text-gray-600 mt-2">
-        Esri Ocean Basemap · Colors = closing rate · Laylines from TWD ± TWA · Click boats for details
-      </p>
     </div>
   );
 }

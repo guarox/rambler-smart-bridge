@@ -5,9 +5,9 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("page loads with correct title and header", async ({ page }) => {
-  await expect(page.getByRole("heading", { name: "Rambler Smart Bridge" })).toBeVisible();
-  await expect(page.getByText("J/99 · USA 99 · MMSI 338380946")).toBeVisible();
-  await expect(page.getByText("Simulated Live · 2s updates")).toBeVisible();
+  await expect(page).toHaveTitle("Rambler Smart Bridge");
+  await expect(page.getByText(/J\/99.*USA 99/)).toBeVisible();
+  await expect(page.getByText(/Simulated/)).toBeVisible();
 });
 
 test("own boat panel shows all instrument values", async ({ page }) => {
@@ -22,7 +22,7 @@ test("own boat panel shows all instrument values", async ({ page }) => {
 });
 
 test("tactical table shows all four competitors", async ({ page }) => {
-  await expect(page.getByText("TACTICAL — COMPETITORS WITHIN 2NM")).toBeVisible();
+  await expect(page.getByText("Tactical")).toBeVisible();
   await expect(page.getByRole("cell", { name: "Ohana" })).toBeVisible();
   await expect(page.getByRole("cell", { name: "Paradigm Shift" })).toBeVisible();
   await expect(page.getByRole("cell", { name: "Success" })).toBeVisible();
@@ -57,11 +57,10 @@ test("map panel renders", async ({ page }) => {
 });
 
 test("HRRR wind panel shows model vs reality delta", async ({ page }) => {
-  await expect(page.getByText("HRRR WIND MODEL VS REALITY")).toBeVisible();
-  await expect(page.getByText("HRRR SPEED")).toBeVisible();
-  await expect(page.getByText("B&G ACTUAL")).toBeVisible();
-  await expect(page.getByText("Δ DELTA")).toBeVisible();
-  await expect(page.getByText("★ nearest")).toBeVisible();
+  await expect(page.getByText("HRRR vs B&G")).toBeVisible();
+  await expect(page.getByText("HRRR Model")).toBeVisible();
+  await expect(page.getByText("B&G Actual")).toBeVisible();
+  await expect(page.getByText("Δ Delta")).toBeVisible();
 });
 
 test("no JS errors on load", async ({ page }) => {

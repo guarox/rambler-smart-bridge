@@ -5,9 +5,9 @@ export default function OwnBoatPanel({ boat }: { boat: OwnBoat }) {
   const stats = [
     { label: "BSP", value: boat.bsp.toFixed(1), unit: "kts" },
     { label: "SOG", value: boat.sog.toFixed(1), unit: "kts" },
-    { label: "COG", value: `${Math.round(boat.cog)}°`, unit: "T" },
+    { label: "COG", value: `${Math.round(boat.cog)}°`, unit: "°T" },
     { label: "TWS", value: boat.tws.toFixed(1), unit: "kts" },
-    { label: "TWD", value: `${Math.round(boat.twd)}°`, unit: "T" },
+    { label: "TWD", value: `${Math.round(boat.twd)}°`, unit: "°T" },
     { label: "TWA", value: `${Math.round(boat.twa)}°`, unit: "" },
     { label: "Depth", value: boat.depth.toFixed(1), unit: "m" },
   ];

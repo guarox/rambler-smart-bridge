@@ -4,6 +4,7 @@ import TacticalTable from "./components/TacticalTable";
 import WindOverlayPanel from "./components/WindOverlayPanel";
 import RaceMapLoader from "./components/RaceMapLoader";
 import PerformancePanel from "./components/PerformancePanel";
+import StartTimer from "./components/StartTimer";
 import { useSimulatedLiveData } from "./lib/useSimulatedLiveData";
 
 export default function Home() {
@@ -11,26 +12,35 @@ export default function Home() {
   const boatWithTrail = { ...boat, trail: boatTrail };
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white p-4 space-y-4">
-      <div className="flex items-center justify-between">
+    <main className="min-h-screen bg-slate-950 text-white p-3 space-y-3">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Rambler Smart Bridge</h1>
-          <p className="text-xs text-gray-500 mt-0.5">J/99 · USA 99 · MMSI 338380946 · PHRF Spinnaker 1</p>
+          <h1 className="text-xl font-bold tracking-tight text-white">
+            <span className="text-green-400">●</span> Rambler
+            <span className="text-slate-500 font-normal text-sm ml-2">J/99 · USA 99 · PHRF Spinnaker 1</span>
+          </h1>
         </div>
-        <div className="text-right">
-          <div className="text-xs text-green-500 font-mono">● Simulated Live · 2s updates</div>
-        </div>
+        <div className="text-xs text-slate-500 font-mono">Simulated · 2s</div>
       </div>
 
-      <OwnBoatPanel boat={boat} />
-      <PerformancePanel boat={boat} twdHistory={twdHistory} />
-      <RaceMapLoader boat={boatWithTrail} targets={targets} windGrid={windGrid} />
-      <TacticalTable targets={targets} boat={boat} />
-      <WindOverlayPanel boat={boat} windGrid={windGrid} />
+      {/* Row 1: instruments + timer */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <div className="lg:col-span-2"><OwnBoatPanel boat={boat} /></div>
+        <StartTimer />
+      </div>
 
-      <p className="text-xs text-gray-700 text-center pb-2">
-        Rambler Smart Bridge · Raspberry Pi 5 + Signal K + InfluxDB · Simulated live data
-      </p>
+      {/* Row 2: performance */}
+      <PerformancePanel boat={boat} twdHistory={twdHistory} />
+
+      {/* Row 3: map */}
+      <RaceMapLoader boat={boatWithTrail} targets={targets} windGrid={windGrid} />
+
+      {/* Row 4: tactical + wind */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
+        <div className="lg:col-span-3"><TacticalTable targets={targets} boat={boat} /></div>
+        <div className="lg:col-span-2"><WindOverlayPanel boat={boat} windGrid={windGrid} /></div>
+      </div>
     </main>
   );
 }
