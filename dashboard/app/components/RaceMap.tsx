@@ -11,6 +11,7 @@ interface TargetLive {
   cog: number;
   sog: number;
   distance: number;
+  bearing: number;
   closingRate: number;
   isHigher: boolean;
   isFaster: boolean;
