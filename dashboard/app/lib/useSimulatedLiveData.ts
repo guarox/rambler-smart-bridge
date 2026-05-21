@@ -47,11 +47,14 @@ export interface TargetState extends Target {
 export function useSimulatedLiveData() {
   const [boat, setBoat] = useState<OwnBoat>({ ...seedBoat });
   const [boatTrail, setBoatTrail] = useState<[number, number][]>([[seedBoat.lat, seedBoat.lon]]);
-  const [twdHistory, setTwdHistory] = useState<number[]>(Array(60).fill(seedBoat.twd));
-  const [twsHistory, setTwsHistory] = useState<number[]>(Array(60).fill(seedBoat.tws));
+  const [twdHistory, setTwdHistory] = useState<number[]>(Array(60).fill(seedBoat.twd)); // kept for wind shift calc
   const [polarHistory, setPolarHistory] = useState<number[]>(Array(60).fill(
     Math.round((seedBoat.bsp / polarTarget(seedBoat.tws, Math.abs(seedBoat.twa))) * 100)
   ));
+  // windShiftHistory: cumulative shift from oldest TWD in window — positive=veered(header on port), negative=backed(lift on port)
+  const [windShiftHistory, setWindShiftHistory] = useState<number[]>(Array(60).fill(0));
+  const seedVmg = seedBoat.bsp * Math.cos((Math.abs(seedBoat.twa) * Math.PI) / 180);
+  const [vmgHistory, setVmgHistory] = useState<number[]>(Array(60).fill(parseFloat(seedVmg.toFixed(2))));
   const [targets, setTargets] = useState<TargetState[]>(
     seedTargets.map((t) => {
       const [lat, lon] = destPoint(seedBoat.lat, seedBoat.lon, t.bearing, t.distance);
@@ -63,9 +66,11 @@ export function useSimulatedLiveData() {
   const boatRef = useRef(boat);
   const boatTrailRef = useRef(boatTrail);
   const targetsRef = useRef(targets);
+  const twdHistoryRef = useRef(twdHistory);
   boatRef.current = boat;
   boatTrailRef.current = boatTrail;
   targetsRef.current = targets;
+  twdHistoryRef.current = twdHistory;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -111,17 +116,29 @@ export function useSimulatedLiveData() {
       setWindGrid((prev) => prev.map((cell) => ({ ...cell, speed: Math.max(8, Math.min(22, cell.speed + jitter(0, 0.2))), dir: cell.dir + jitter(0, 0.5) })));
 
       const newPolarPct = Math.round((newBsp / polarTarget(newTws, Math.abs(newTwa))) * 100);
+      const newVmg = parseFloat((newBsp * Math.cos((Math.abs(newTwa) * Math.PI) / 180)).toFixed(2));
+
+      // Wind shift: delta from oldest TWD value in window, normalized ±180
+      const oldTwd = twdHistoryRef.current[0] ?? newTwd;
+      let rawShift = newTwd - oldTwd;
+      if (rawShift > 180) rawShift -= 360;
+      if (rawShift < -180) rawShift += 360;
 
       setBoat(newBoat);
       setBoatTrail(newBoatTrail);
       setTwdHistory(prev => [...prev.slice(-59), newTwd]);
-      setTwsHistory(prev => [...prev.slice(-59), newTws]);
       setPolarHistory(prev => [...prev.slice(-59), newPolarPct]);
+      setWindShiftHistory(prev => {
+        // Recompute all shifts relative to the new oldest value
+        const updated = [...prev.slice(-59), parseFloat(rawShift.toFixed(2))];
+        return updated;
+      });
+      setVmgHistory(prev => [...prev.slice(-59), newVmg]);
       setTargets(newTargets);
     }, UPDATE_MS);
 
     return () => clearInterval(interval);
   }, []);
 
-  return { boat, boatTrail, targets, windGrid, twdHistory, twsHistory, polarHistory };
+  return { boat, boatTrail, targets, windGrid, twdHistory, polarHistory, windShiftHistory, vmgHistory };
 }

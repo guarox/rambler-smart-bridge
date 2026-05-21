@@ -10,7 +10,7 @@ import WindTrendPanel from "./components/WindTrendPanel";
 import { useSimulatedLiveData } from "./lib/useSimulatedLiveData";
 
 export default function Home() {
-  const { boat, boatTrail, targets, windGrid, twdHistory, twsHistory, polarHistory } = useSimulatedLiveData();
+  const { boat, boatTrail, targets, windGrid, twdHistory, polarHistory, windShiftHistory, vmgHistory } = useSimulatedLiveData();
   const boatWithTrail = { ...boat, trail: boatTrail };
   const [alarmThreshold, setAlarmThreshold] = useState(85);
 
@@ -46,7 +46,7 @@ export default function Home() {
       <RaceMapLoader boat={boatWithTrail} targets={targets} windGrid={windGrid} />
 
       {/* Row 4: trends */}
-      <WindTrendPanel twdHistory={twdHistory} twsHistory={twsHistory} polarHistory={polarHistory} alarmThreshold={alarmThreshold} />
+      <WindTrendPanel windShiftHistory={windShiftHistory} vmgHistory={vmgHistory} polarHistory={polarHistory} alarmThreshold={alarmThreshold} />
 
       {/* Row 5: tactical + wind */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
