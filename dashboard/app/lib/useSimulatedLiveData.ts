@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { OwnBoat, Target, WindCell, hrrGrid as baseGrid, ownBoat as seedBoat, targets as seedTargets, destPoint } from "./mockData";
+import { OwnBoat, Target, WindCell, hrrGrid as baseGrid, ownBoat as seedBoat, targets as seedTargets, destPoint, polarTarget } from "./mockData";
 
 const R_NM = 3440.065;
 const UPDATE_MS = 2000;
@@ -47,7 +47,11 @@ export interface TargetState extends Target {
 export function useSimulatedLiveData() {
   const [boat, setBoat] = useState<OwnBoat>({ ...seedBoat });
   const [boatTrail, setBoatTrail] = useState<[number, number][]>([[seedBoat.lat, seedBoat.lon]]);
-  const [twdHistory, setTwdHistory] = useState<number[]>([seedBoat.twd]);
+  const [twdHistory, setTwdHistory] = useState<number[]>(Array(60).fill(seedBoat.twd));
+  const [twsHistory, setTwsHistory] = useState<number[]>(Array(60).fill(seedBoat.tws));
+  const [polarHistory, setPolarHistory] = useState<number[]>(Array(60).fill(
+    Math.round((seedBoat.bsp / polarTarget(seedBoat.tws, Math.abs(seedBoat.twa))) * 100)
+  ));
   const [targets, setTargets] = useState<TargetState[]>(
     seedTargets.map((t) => {
       const [lat, lon] = destPoint(seedBoat.lat, seedBoat.lon, t.bearing, t.distance);
@@ -106,14 +110,18 @@ export function useSimulatedLiveData() {
       // Shift HRRR grid slightly
       setWindGrid((prev) => prev.map((cell) => ({ ...cell, speed: Math.max(8, Math.min(22, cell.speed + jitter(0, 0.2))), dir: cell.dir + jitter(0, 0.5) })));
 
+      const newPolarPct = Math.round((newBsp / polarTarget(newTws, Math.abs(newTwa))) * 100);
+
       setBoat(newBoat);
       setBoatTrail(newBoatTrail);
-      setTwdHistory(prev => [...prev.slice(-14), newTwd]); // keep 15 values = 30s
+      setTwdHistory(prev => [...prev.slice(-59), newTwd]);
+      setTwsHistory(prev => [...prev.slice(-59), newTws]);
+      setPolarHistory(prev => [...prev.slice(-59), newPolarPct]);
       setTargets(newTargets);
     }, UPDATE_MS);
 
     return () => clearInterval(interval);
   }, []);
 
-  return { boat, boatTrail, targets, windGrid, twdHistory };
+  return { boat, boatTrail, targets, windGrid, twdHistory, twsHistory, polarHistory };
 }

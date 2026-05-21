@@ -1,15 +1,18 @@
 "use client";
+import { useState } from "react";
 import OwnBoatPanel from "./components/OwnBoatPanel";
 import TacticalTable from "./components/TacticalTable";
 import WindOverlayPanel from "./components/WindOverlayPanel";
 import RaceMapLoader from "./components/RaceMapLoader";
 import PerformancePanel from "./components/PerformancePanel";
 import StartTimer from "./components/StartTimer";
+import WindTrendPanel from "./components/WindTrendPanel";
 import { useSimulatedLiveData } from "./lib/useSimulatedLiveData";
 
 export default function Home() {
-  const { boat, boatTrail, targets, windGrid, twdHistory } = useSimulatedLiveData();
+  const { boat, boatTrail, targets, windGrid, twdHistory, twsHistory, polarHistory } = useSimulatedLiveData();
   const boatWithTrail = { ...boat, trail: boatTrail };
+  const [alarmThreshold, setAlarmThreshold] = useState(85);
 
   return (
     <main className="min-h-screen bg-slate-950 text-white p-3 space-y-3">
@@ -31,12 +34,21 @@ export default function Home() {
       </div>
 
       {/* Row 2: performance */}
-      <PerformancePanel boat={boat} twdHistory={twdHistory} />
+      <PerformancePanel
+        boat={boat}
+        twdHistory={twdHistory}
+        polarHistory={polarHistory}
+        alarmThreshold={alarmThreshold}
+        onAlarmThresholdChange={setAlarmThreshold}
+      />
 
       {/* Row 3: map */}
       <RaceMapLoader boat={boatWithTrail} targets={targets} windGrid={windGrid} />
 
-      {/* Row 4: tactical + wind */}
+      {/* Row 4: trends */}
+      <WindTrendPanel twdHistory={twdHistory} twsHistory={twsHistory} polarHistory={polarHistory} alarmThreshold={alarmThreshold} />
+
+      {/* Row 5: tactical + wind */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
         <div className="lg:col-span-3"><TacticalTable targets={targets} boat={boat} /></div>
         <div className="lg:col-span-2"><WindOverlayPanel boat={boat} windGrid={windGrid} /></div>
