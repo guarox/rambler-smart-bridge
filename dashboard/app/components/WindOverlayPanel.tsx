@@ -26,7 +26,7 @@ export default function WindOverlayPanel({ boat, windGrid }: Props) {
             <div key={i} className={`rounded p-2 text-center ${isNearest ? "bg-blue-900 border border-blue-500" : "bg-gray-800"}`}>
               <div className="text-xs text-gray-500 mb-1">{cell.lat.toFixed(2)}, {cell.lon.toFixed(2)}</div>
               <div className="text-base font-mono font-bold text-white">{cell.speed.toFixed(1)} kts</div>
-              <div className="text-xs text-gray-400">{cell.dir}° T</div>
+              <div className="text-xs text-gray-400">{Math.round(cell.dir)}° T</div>
               {isNearest && <div className="text-xs text-blue-300 mt-1">★ nearest</div>}
             </div>
           );
@@ -37,8 +37,8 @@ export default function WindOverlayPanel({ boat, windGrid }: Props) {
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-gray-800 rounded-lg p-3 text-center">
           <div className="text-xs text-gray-500 uppercase mb-1">HRRR Speed</div>
-          <div className="text-lg font-bold font-mono text-white">{nearest.speed} kts</div>
-          <div className="text-xs text-gray-500">{nearest.dir}° T</div>
+          <div className="text-lg font-bold font-mono text-white">{nearest.speed.toFixed(1)} kts</div>
+          <div className="text-xs text-gray-500">{Math.round(nearest.dir)}° T</div>
         </div>
         <div className="bg-gray-800 rounded-lg p-3 text-center">
           <div className="text-xs text-gray-500 uppercase mb-1">B&G Actual</div>
