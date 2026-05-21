@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
 test("page loads with correct title and header", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Rambler Smart Bridge" })).toBeVisible();
   await expect(page.getByText("J/99 · USA 99 · MMSI 338380946")).toBeVisible();
-  await expect(page.getByText("⚠ Mock Data · Preview Build")).toBeVisible();
+  await expect(page.getByText("Simulated Live · 2s updates")).toBeVisible();
 });
 
 test("own boat panel shows all instrument values", async ({ page }) => {

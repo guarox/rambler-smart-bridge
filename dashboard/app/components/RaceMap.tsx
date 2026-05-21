@@ -98,7 +98,8 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
 
       // Competitor markers + trails
       targets.forEach((t) => {
-        const color = t.isHigher && t.isFaster ? "#f97316" : t.isHigher || t.isFaster ? "#facc15" : "#94a3b8";
+        // Red = threat (they beat us on both), yellow = mixed, green = we're winning
+        const color = !t.isHigher && !t.isFaster ? "#ef4444" : t.isHigher && t.isFaster ? "#22c55e" : "#facc15";
 
         // Trail first (renders under marker)
         const trail = L.polyline([[t.lat, t.lon]], {
@@ -156,7 +157,8 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
 
       // Update competitors + trails
       targets.forEach((t) => {
-        const color = t.isHigher && t.isFaster ? "#f97316" : t.isHigher || t.isFaster ? "#facc15" : "#94a3b8";
+        // Red = threat (they beat us on both), yellow = mixed, green = we're winning
+        const color = !t.isHigher && !t.isFaster ? "#ef4444" : t.isHigher && t.isFaster ? "#22c55e" : "#facc15";
         const m = targetMarkersRef.current.get(t.mmsi);
         if (m) {
           m.setLatLng([t.lat, t.lon])
@@ -192,9 +194,11 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Race Chart</h2>
         <div className="flex gap-4 text-xs flex-wrap">
           <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-green-500"></span>Rambler</span>
-          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-orange-500"></span>Higher+Faster</span>
-          <span className="flex items-center gap-1 text-yellow-400">▲ HRRR model</span>
-          <span className="flex items-center gap-1 text-blue-400">▲ B&G actual</span>
+          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-red-500"></span>Threat</span>
+          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-yellow-400"></span>Mixed</span>
+          <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full bg-green-400"></span>We winning</span>
+          <span className="flex items-center gap-1 text-yellow-400">▲ HRRR</span>
+          <span className="flex items-center gap-1 text-blue-400">▲ B&G</span>
         </div>
       </div>
       <div ref={containerRef} className="rounded-lg overflow-hidden" style={{ height: "480px" }} />
