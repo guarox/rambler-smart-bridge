@@ -73,16 +73,17 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
       const makeIcon = (svg: string, size: number): DivIcon =>
         L.divIcon({ html: svg, className: "", iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
 
-      // OpenStreetMap base
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap contributors",
-        maxZoom: 18,
-      }).addTo(map);
+      // Esri Ocean Basemap — marine chart with depth contours
+      L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "Esri Ocean Basemap", maxZoom: 16 }
+      ).addTo(map);
 
-      // OpenSeaMap nautical overlay (depth contours, buoys, nav aids)
-      L.tileLayer("https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png", {
-        opacity: 0.85, maxZoom: 18, attribution: "© OpenSeaMap",
-      }).addTo(map);
+      // Esri Ocean Reference overlay — labels, nav aids, buoys
+      L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Reference/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "", maxZoom: 16, opacity: 0.9 }
+      ).addTo(map);
 
       // Rambler trail
       ramblerTrailRef.current = L.polyline([[boat.lat, boat.lon]], {
@@ -198,7 +199,7 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
       </div>
       <div ref={containerRef} className="rounded-lg overflow-hidden" style={{ height: "480px" }} />
       <p className="text-xs text-gray-600 mt-2">
-        OSM + OpenSeaMap · Arrows point downwind · Yellow = HRRR model · Blue = B&G actual · Boats update every 2s · Click for details
+        Esri Ocean Basemap · Arrows point downwind · Yellow = HRRR model · Blue = B&G actual · Boats update every 2s · Click for details
       </p>
     </div>
   );
