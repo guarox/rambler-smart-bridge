@@ -1,7 +1,8 @@
 import OwnBoatPanel from "./components/OwnBoatPanel";
 import TacticalTable from "./components/TacticalTable";
 import WindOverlayPanel from "./components/WindOverlayPanel";
-import { ownBoat, targets } from "./lib/mockData";
+import RaceMapLoader from "./components/RaceMapLoader";
+import { ownBoat, targets, hrrGrid } from "./lib/mockData";
 
 export default function Home() {
   return (
@@ -17,6 +18,7 @@ export default function Home() {
       </div>
 
       <OwnBoatPanel boat={ownBoat} />
+      <RaceMapLoader boat={ownBoat} targets={targets} windGrid={hrrGrid} />
       <TacticalTable targets={targets} boat={ownBoat} />
       <WindOverlayPanel />
 

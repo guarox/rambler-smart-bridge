@@ -36,6 +36,37 @@ export const ownBoat: OwnBoat = {
   lon: -87.6298,
 };
 
+// Compute lat/lon from a reference point, bearing (deg true), and distance (nm)
+export function destPoint(lat: number, lon: number, bearingDeg: number, distNm: number): [number, number] {
+  const R = 3440.065;
+  const d = distNm / R;
+  const lat1 = (lat * Math.PI) / 180;
+  const lon1 = (lon * Math.PI) / 180;
+  const b = (bearingDeg * Math.PI) / 180;
+  const lat2 = Math.asin(Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(b));
+  const lon2 = lon1 + Math.atan2(Math.sin(b) * Math.sin(d) * Math.cos(lat1), Math.cos(d) - Math.sin(lat1) * Math.sin(lat2));
+  return [(lat2 * 180) / Math.PI, (lon2 * 180) / Math.PI];
+}
+
+export interface WindCell {
+  lat: number;
+  lon: number;
+  speed: number;
+  dir: number; // direction wind is coming FROM (meteorological)
+}
+
+export const hrrGrid: WindCell[] = [
+  { lat: 42.38, lon: -87.65, speed: 15.2, dir: 272 },
+  { lat: 42.38, lon: -87.62, speed: 14.8, dir: 270 },
+  { lat: 42.38, lon: -87.59, speed: 14.1, dir: 268 },
+  { lat: 42.36, lon: -87.65, speed: 15.5, dir: 275 },
+  { lat: 42.36, lon: -87.62, speed: 14.5, dir: 274 },
+  { lat: 42.36, lon: -87.59, speed: 13.8, dir: 271 },
+  { lat: 42.34, lon: -87.65, speed: 16.0, dir: 278 },
+  { lat: 42.34, lon: -87.62, speed: 15.1, dir: 276 },
+  { lat: 42.34, lon: -87.59, speed: 14.3, dir: 273 },
+];
+
 export const targets: Target[] = [
   {
     mmsi: "338123456",
