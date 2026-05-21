@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { OwnBoat, Target, WindCell, hrrGrid as baseGrid, ownBoat as seedBoat, targets as seedTargets } from "./mockData";
+import { OwnBoat, Target, WindCell, hrrGrid as baseGrid, ownBoat as seedBoat, targets as seedTargets, destPoint } from "./mockData";
 
 const R_NM = 3440.065;
 const UPDATE_MS = 2000;
@@ -45,7 +45,7 @@ export function useSimulatedLiveData() {
   const [boat, setBoat] = useState<OwnBoat>({ ...seedBoat });
   const [targets, setTargets] = useState<TargetState[]>(
     seedTargets.map((t) => {
-      const [lat, lon] = moveBoat(seedBoat.lat, seedBoat.lon, t.bearing, t.distance * 60, 3600);
+      const [lat, lon] = destPoint(seedBoat.lat, seedBoat.lon, t.bearing, t.distance);
       return { ...t, lat, lon };
     })
   );

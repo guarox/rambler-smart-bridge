@@ -40,17 +40,17 @@ export default function TacticalTable({ targets, boat }: { targets: Target[]; bo
                 <tr key={t.mmsi} className="border-b border-gray-800 hover:bg-gray-800/40 transition-colors">
                   <td className="py-2 pr-4 font-semibold text-white">{t.name}</td>
                   <td className="py-2 pr-4 text-right font-mono text-gray-200">{t.distance.toFixed(2)}</td>
-                  <td className="py-2 pr-4 text-right font-mono text-gray-200">{t.bearing}°</td>
+                  <td className="py-2 pr-4 text-right font-mono text-gray-200">{Math.round(t.bearing)}°</td>
                   <td className={`py-2 pr-4 text-right font-mono font-bold ${closing ? "text-green-400" : "text-red-400"}`}>
-                    {closing ? "▼ " : "▲ "}{Math.abs(t.closingRate * 60).toFixed(3)} nm/hr
+                    {closing ? "▼ " : "▲ "}{Math.abs(t.closingRate).toFixed(2)} nm/hr
                   </td>
                   <td className="py-2 pr-4 text-right font-mono text-gray-200">{t.sog.toFixed(1)} kts</td>
-                  <td className="py-2 pr-4 text-right font-mono text-gray-200">{t.effectiveWindAngle}°</td>
+                  <td className="py-2 pr-4 text-right font-mono text-gray-200">{Math.round(t.effectiveWindAngle)}°</td>
                   <td className="py-2 pr-4 text-center">
-                    <Badge positive={t.isHigher} label={t.isHigher ? `↑ ${boat.twa}° vs ${t.effectiveWindAngle}°` : `↓ ${boat.twa}° vs ${t.effectiveWindAngle}°`} />
+                    <Badge positive={t.isHigher} label={t.isHigher ? `↑ ${Math.round(boat.twa)}° vs ${Math.round(t.effectiveWindAngle)}°` : `↓ ${Math.round(boat.twa)}° vs ${Math.round(t.effectiveWindAngle)}°`} />
                   </td>
                   <td className="py-2 pr-4 text-center">
-                    <Badge positive={t.isFaster} label={t.isFaster ? `↑ ${boat.sog} vs ${t.sog}` : `↓ ${boat.sog} vs ${t.sog}`} />
+                    <Badge positive={t.isFaster} label={t.isFaster ? `↑ ${boat.sog.toFixed(1)} vs ${t.sog.toFixed(1)}` : `↓ ${boat.sog.toFixed(1)} vs ${t.sog.toFixed(1)}`} />
                   </td>
                   <td className="py-2 text-right">
                     <SparkLine data={t.distanceHistory} closing={closing} />

@@ -70,15 +70,15 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
       const makeIcon = (svg: string, size: number): DivIcon =>
         L.divIcon({ html: svg, className: "", iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
 
-      // NOAA Nautical Charts (RNC) base layer
-      L.tileLayer(
-        "https://seamlessrnc.nauticalcharts.noaa.gov/arcgis/rest/services/RNC/NOAA_RNC/ImageServer/tile/{z}/{y}/{x}",
-        { attribution: "NOAA Nautical Charts", maxZoom: 16, opacity: 1 }
-      ).addTo(map);
+      // OpenStreetMap base
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+        maxZoom: 18,
+      }).addTo(map);
 
-      // OpenSeaMap marks overlay (buoys, nav aids)
+      // OpenSeaMap nautical overlay (depth contours, buoys, nav aids)
       L.tileLayer("https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png", {
-        opacity: 0.85, maxZoom: 18,
+        opacity: 0.85, maxZoom: 18, attribution: "© OpenSeaMap",
       }).addTo(map);
 
       // Rambler
@@ -175,7 +175,7 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
       </div>
       <div ref={containerRef} className="rounded-lg overflow-hidden" style={{ height: "480px" }} />
       <p className="text-xs text-gray-600 mt-2">
-        NOAA Nautical Charts · Arrows point downwind · Yellow = HRRR model · Blue = B&G actual · Boats update every 2s · Click for details
+        OSM + OpenSeaMap · Arrows point downwind · Yellow = HRRR model · Blue = B&G actual · Boats update every 2s · Click for details
       </p>
     </div>
   );
