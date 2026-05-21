@@ -100,6 +100,7 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
   const [showLaylines, setShowLaylines] = React.useState(true);
   const [showRings, setShowRings] = React.useState(false);
   const [rulerActive, setRulerActive] = React.useState(false);
+  const [rulerHasContent, setRulerHasContent] = React.useState(false);
   const rangeRingsRef = useRef<Circle[]>([]);
   const rulerStartRef = useRef<[number, number] | null>(null);
   const rulerLineRef = useRef<Polyline | null>(null);
@@ -302,6 +303,7 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
       rulerMarkersRef.current.forEach(m => m.remove());
       rulerMarkersRef.current = [];
       rulerStartRef.current = null;
+      setRulerHasContent(false);
     };
 
     if (!rulerActive) { clearRuler(); return; }
@@ -312,14 +314,16 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
 
       import("leaflet").then((L) => {
         if (!rulerStartRef.current) {
-          // First click — anchor point
+          // First click — green start dot
           rulerStartRef.current = [lat, lng];
           const dot = L.circleMarker([lat, lng], {
-            radius: 5, color: "#fff", fillColor: "#fff", fillOpacity: 1, weight: 2,
+            radius: 6, color: "#22c55e", fillColor: "#22c55e", fillOpacity: 0.9, weight: 2,
           }).addTo(map);
+          dot.bindTooltip("Start", { permanent: true, direction: "top", className: "" });
           rulerMarkersRef.current.push(dot);
+          setRulerHasContent(true);
         } else {
-          // Second click — measure
+          // Second click — red end dot, draw line, show label
           const [sLat, sLon] = rulerStartRef.current;
           const dist = haversineNm(sLat, sLon, lat, lng);
           const brg = bearingBetween(sLat, sLon, lat, lng);
@@ -328,25 +332,27 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
 
           rulerLineRef.current?.remove();
           rulerLineRef.current = L.polyline([[sLat, sLon], [lat, lng]], {
-            color: "#fff", weight: 2, dashArray: "6 4", opacity: 0.9,
+            color: "#e2e8f0", weight: 2, dashArray: "6 4", opacity: 0.9,
           }).addTo(map);
 
           const endDot = L.circleMarker([lat, lng], {
-            radius: 5, color: "#fff", fillColor: "#fff", fillOpacity: 1, weight: 2,
+            radius: 6, color: "#ef4444", fillColor: "#ef4444", fillOpacity: 0.9, weight: 2,
           }).addTo(map);
+          endDot.bindTooltip("End", { permanent: true, direction: "top", className: "" });
 
           const label = L.marker([midLat, midLon], {
             icon: L.divIcon({
-              html: `<div style="background:#0f172a;border:1px solid #e2e8f0;border-radius:4px;padding:3px 8px;white-space:nowrap;font-size:12px;font-family:monospace;color:#f1f5f9;font-weight:bold">${dist.toFixed(2)} nm · ${Math.round(brg)}°T</div>`,
+              html: `<div style="background:#0f172a;border:1px solid #94a3b8;border-radius:4px;padding:4px 10px;white-space:nowrap;font-size:12px;font-family:monospace;color:#f1f5f9;font-weight:bold;line-height:1.4">📏 ${dist.toFixed(2)} nm<br>🧭 ${Math.round(brg)}° True</div>`,
               className: "",
-              iconAnchor: [-4, 10],
+              iconAnchor: [-4, 12],
             }),
           }).addTo(map);
 
           rulerMarkersRef.current.push(endDot, label);
-          // Reset so next click starts a fresh measurement
+          // Reset for next measurement pair
           rulerStartRef.current = null;
           rulerMarkersRef.current = rulerMarkersRef.current.filter(m => m === endDot || m === label);
+          setRulerHasContent(true);
         }
       });
     };
@@ -357,6 +363,15 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
       clearRuler();
     };
   }, [rulerActive]);
+
+  const clearRulerCallback = React.useCallback(() => {
+    rulerLineRef.current?.remove();
+    rulerLineRef.current = null;
+    rulerMarkersRef.current.forEach(m => m.remove());
+    rulerMarkersRef.current = [];
+    rulerStartRef.current = null;
+    setRulerHasContent(false);
+  }, []);
 
   const fitFleet = React.useCallback(() => {
     if (!mapRef.current) return;
@@ -395,8 +410,16 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
             onClick={() => setRulerActive(v => !v)}
             className={`px-2 py-0.5 rounded border text-xs font-mono transition-colors ${rulerActive ? "border-yellow-400/60 text-yellow-300 bg-yellow-900/20" : "border-gray-600 text-gray-500"}`}
           >
-            📏 Ruler {rulerActive ? "— click to measure" : "OFF"}
+            📏 Ruler {rulerActive ? "ON" : "OFF"}
           </button>
+          {rulerHasContent && (
+            <button
+              onClick={clearRulerCallback}
+              className="px-2 py-0.5 rounded border border-red-600/60 text-red-400 hover:text-red-300 text-xs font-mono transition-colors"
+            >
+              ✕ Clear
+            </button>
+          )}
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-green-500 border-2 border-white inline-block"></span>Rambler</span>
           <span className="flex items-center gap-1 text-green-400">● Closing</span>
           <span className="flex items-center gap-1 text-red-400">● Opening</span>
