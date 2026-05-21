@@ -73,6 +73,6 @@ Results written to `vessels.<mmsi>.tactical.*` in Signal K, logged to InfluxDB, 
 
 ## Reference Documents
 
-- `rambler_system_architecture.md` — Hardware specs, power infrastructure, procurement checklist
-- `rambler_smart_bridge_phase2.md` — Phase 2/3 engineering plan (data pipeline, networking, weather model)
-- PDFs in repo root — Datasheets for PICAN-M, XTAR-Link, NMEA 2000 standards, OpenPlotter setup guides
+- `docs/rambler_system_architecture.md` — Hardware specs, power infrastructure, procurement checklist
+- `docs/rambler_smart_bridge_phase2.md` — Phase 2/3 engineering plan (data pipeline, networking, weather model)
+- `docs/` — Reference PDFs: PICAN-M datasheets, XTAR-Link, NMEA 2000 standards, OpenPlotter guides
