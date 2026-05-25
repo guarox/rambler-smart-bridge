@@ -149,6 +149,40 @@ Determine which network setup you are using:
    ```
 2. Connect your devices to the `Rambler_Net` SSID (Password: `RAMBLER2026`).
 
+#### 3.2.1 Deploying the Dashboard Update to the Pi
+*To copy the new client-side weather routing engine and layout modifications to the local Pi server:*
+
+**Method 1: Build on Laptop & Copy (Recommended - Faster)**
+1. On your laptop, navigate to the dashboard folder:
+   ```bash
+   cd dashboard
+   ```
+2. Run the build (generates static HTML files in `dashboard/out/`):
+   ```bash
+   npm run build
+   ```
+3. Copy the compiled files to the Pi's web root:
+   ```bash
+   scp -r out/* guarox@rambler.local:/var/www/html/
+   ```
+
+**Method 2: Pull and Build directly on the Pi**
+*(Requires the Pi to be connected to the internet/Starlink first)*
+1. Log in to the Pi via SSH:
+   ```bash
+   ssh guarox@rambler.local
+   ```
+2. Navigate to the local repository, pull the latest code, and build:
+   ```bash
+   cd /home/guarox/rambler
+   git pull origin main
+   cd dashboard
+   npm install
+   npm run build
+   # Copy the output to the local web server directory
+   sudo cp -r out/* /var/www/html/
+   ```
+
 ### 3.3 Configure Signal K for N2K ⛵
 
 First time on the boat only:
