@@ -9,19 +9,27 @@
 
 ## QUICK REFERENCE
 
-| Access | Address | When |
-|--------|---------|------|
-| SSH wired | `ssh guarox@192.168.4.100` | Homelab ethernet |
-| SSH mDNS | `ssh guarox@rambler.local` | Any network ← best |
-| SSH Race Mode | `ssh guarox@192.168.5.1` | On Rambler_Net |
-| Dashboard local | `http://192.168.5.1` | On Rambler_Net (no cert) |
-| Dashboard remote | `https://rambler99.vercel.app` | Anywhere |
-| Signal K | `rambler.local:3000` | Any network ← best |
-| Signal K Race Mode | `192.168.5.1:3000` | On Rambler_Net |
-| Signal K wired | `192.168.4.100:3000` | Homelab |
+### Network Configurations
 
-**Pi credentials:** `guarox` / `2wsx#edC`  
-**WiFi:** `Rambler_Net` / `RAMBLER2026` → DHCP `192.168.5.2–20` → internet via NAT
+#### Option A: Wi-Fi-Only MVP (Recommended Starlink Hub)
+*All devices connect to your onboard Starlink router's Wi-Fi network. The Starlink router handles DHCP and network routing. Safe, low-risk, and requires no Ethernet wiring.*
+* **WiFi SSID / Password:** *Use your onboard Starlink network credentials*
+* **Accessing the Pi:** Connect to Starlink Wi-Fi and use mDNS:
+  * **SSH:** `ssh guarox@rambler.local`
+  * **Local Dashboard:** `http://rambler.local`
+  * **Signal K Admin:** `http://rambler.local:3000`
+  * **Dashboard Remote:** `https://rambler99.vercel.app` (Internet required)
+
+#### Option B: Advanced Standalone (Pi WAP - Offline AP)
+*The Pi acts as the central router and Access Point (requires hostapd/dnsmasq enabled on Pi). Used for isolated offline telemetry when not using Starlink Wi-Fi.*
+* **WiFi SSID / Password:** `Rambler_Net` / `RAMBLER2026`
+* **Accessing the Pi:**
+  * **SSH:** `ssh guarox@192.168.5.1`
+  * **Local Dashboard:** `http://192.168.5.1`
+  * **Signal K Admin:** `http://192.168.5.1:3000`
+
+**Pi credentials:** `guarox` / `2wsx#edC`
+
 
 ---
 
@@ -108,7 +116,40 @@ sudo reboot
 
 - [ ] **Physical mounting:** nav station, away from heat and water
 
-### 3.2 Configure Signal K for N2K ⛵
+### 3.2 Onboard Network Setup
+
+Determine which network setup you are using:
+
+#### To Set Up Option A: Wi-Fi-Only MVP (Starlink Router Hub - Recommended)
+1. Boot the Starlink router.
+2. Power up the Pi and temporarily connect to it via Homelab ethernet or by connecting to the temporary `Rambler_Net` SSID.
+3. Access the terminal via SSH (`ssh guarox@rambler.local` or `ssh guarox@192.168.5.1`).
+4. Scan and connect the Pi to the Starlink Wi-Fi network:
+   ```bash
+   # Scan for networks to verify visibility
+   sudo nmcli dev wifi list
+   # Connect to Starlink SSID
+   sudo nmcli dev wifi connect "YOUR_STARLINK_SSID" password "YOUR_STARLINK_PASSWORD"
+   ```
+5. Disable the Pi's internal access point services so it acts purely as a client:
+   ```bash
+   sudo systemctl stop hostapd dnsmasq
+   sudo systemctl disable hostapd dnsmasq
+   ```
+6. Reboot the Pi: `sudo reboot`.
+7. Re-connect all crew iPads and phones to the **Starlink Wi-Fi network**.
+8. Verify you can access the Pi at `http://rambler.local` and `http://rambler.local:3000` from any device connected to the Starlink Wi-Fi.
+
+#### To Set Up Option B: Advanced Standalone AP (Pi WAP)
+*If you are running the Pi as the standalone access point (`Rambler_Net`):*
+1. Verify `hostapd` and `dnsmasq` are active:
+   ```bash
+   sudo systemctl enable hostapd dnsmasq
+   sudo systemctl start hostapd dnsmasq
+   ```
+2. Connect your devices to the `Rambler_Net` SSID (Password: `RAMBLER2026`).
+
+### 3.3 Configure Signal K for N2K ⛵
 
 First time on the boat only:
 ```bash
@@ -127,10 +168,13 @@ Open Signal K admin UI: `http://rambler.local:3000`
   - **Server → Vessel Base Data**
   - Name: `Rambler` · MMSI: `338380946`
 
-### 3.3 Verify N2K Data Flowing
+### 3.4 Verify N2K Data Flowing
 
 ```bash
+# If using Option A (Starlink), log in via mDNS:
 ssh guarox@rambler.local
+# If using Option B (Pi WAP), log in via AP gateway:
+# ssh guarox@192.168.5.1
 
 # Check raw N2K PGNs (power on B&G instruments first)
 candump can0
@@ -142,12 +186,21 @@ curl http://localhost:3000/signalk/v1/api/vessels/self/navigation/speedOverGroun
 # Should return speed value (0.0 at dock is fine)
 ```
 
-### 3.4 Dashboard Live Test
+### 3.5 Dashboard Live Test
 
-- [ ] Connect iPad to `Rambler_Net` (password: `RAMBLER2026`)
-- [ ] Open `http://192.168.5.1` in Safari
-- [ ] Tap `◌ SK…` → enter `192.168.5.1:3000` → **Connect**
-- [ ] Verify `● LIVE` (green) appears in instrument panel
+- [ ] Connect iPad to the boat network:
+  - **For Option A (Starlink Hub):** Connect to your Starlink Wi-Fi network.
+  - **For Option B (Pi WAP):** Connect to `Rambler_Net` (password: `RAMBLER2026`).
+- [ ] Open the local dashboard in Safari:
+  - **For Option A:** Open `http://rambler.local`
+  - **For Option B:** Open `http://192.168.5.1`
+- [ ] Connect the dashboard to Signal K:
+  - Tap the red/yellow connection status badge (`◌ SK…` or `◎ SIM`) in the instrument panel header.
+  - Enter the Signal K host:
+    - **For Option A:** `rambler.local:3000`
+    - **For Option B:** `192.168.5.1:3000`
+  - Tap **Connect**.
+- [ ] Verify `● LIVE` (green) appears in the instrument panel.
 - [ ] Walk through all panels, confirm values match B&G chartplotter:
   - [ ] BSP matches Zeus3S
   - [ ] SOG matches Zeus3S
@@ -155,7 +208,7 @@ curl http://localhost:3000/signalk/v1/api/vessels/self/navigation/speedOverGroun
   - [ ] Depth matches
   - [ ] AIS targets appear in Tactical Table (if boats nearby)
 
-### 3.5 Configure Weather Ingestion & PredictWind Routing ⛵
+### 3.6 Configure Weather Ingestion & PredictWind Routing ⛵
 
 - [ ] **NOAA HRRR Ingestion Setup:**
   - [ ] Boot the Starlink system (Blue Sea panel switch) to establish internet connectivity.
@@ -163,7 +216,7 @@ curl http://localhost:3000/signalk/v1/api/vessels/self/navigation/speedOverGroun
   - [ ] Run the weather downloader script: `python3 /home/guarox/rambler/docs/download_hrrr.py`
   - [ ] Confirm file downloads and parses: `/home/guarox/gribs/hrrr_latest.json` should have a recent timestamp.
   - [ ] In the dashboard, select the **WIND** page to verify the regional HRRR wind vectors show up as overlays on the chart.
-  - [ ] Switch off the Starlink once weather grids are downloaded to conserve power.
+  - [ ] Switch off the Starlink satellite connectivity once weather grids are downloaded to conserve power (leaving the router Wi-Fi active for boat communication).
 
 - [ ] **PredictWind Setup:**
   - [ ] While Starlink WAN is connected, tap the header `⬡ PW` button on the dashboard to open the settings panel.
@@ -173,13 +226,17 @@ curl http://localhost:3000/signalk/v1/api/vessels/self/navigation/speedOverGroun
   - [ ] Confirm that routes plot on the chart and tack/gybe markers show target wind angles.
   - [ ] Verify that header status indicator turns green `⬤ PW`.
 
-### 3.6 Race Day Checklist
+### 3.7 Race Day Checklist
 
 - [ ] Pi powered (Blue Sea 4153 switch ON)
-- [ ] iPad connected to `Rambler_Net`
-- [ ] `http://192.168.5.1` loads dashboard
-- [ ] `● LIVE` green in instrument panel
-- [ ] B&G instruments confirm GPS fix
+- [ ] iPad connected to the boat network:
+  - **For Option A:** Connect to Starlink Wi-Fi network.
+  - **For Option B:** Connect to `Rambler_Net`.
+- [ ] Load the dashboard in Safari:
+  - **For Option A:** Open `http://rambler.local`
+  - **For Option B:** Open `http://192.168.5.1`
+- [ ] Confirm `● LIVE` green is shown in the instrument panel.
+- [ ] B&G instruments confirm GPS fix.
 - [ ] Trigger latest HRRR wind grid download via `download_hrrr.py` (via Starlink before leaving dock).
 - [ ] Open PredictWind settings panel and trigger an initial route calculation to the first mark.
 - [ ] Drop a `Start P` and `Start S` mark at committee boat ends.
