@@ -1,0 +1,119 @@
+[WebServer] ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+[WebServer]  We detected multiple lockfiles and selected the directory of /Users/guarox/package-lock.json as the root directory.
+[WebServer]  To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+[WebServer]    See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+[WebServer]  Detected additional lockfiles: 
+[WebServer]    * /Users/guarox/claude/rambler/dashboard/package-lock.json
+[WebServer] 
+
+
+Running 71 tests using 3 workers
+
+[1/71] [chromium] › tests/dashboard.spec.ts:31:5 › own boat panel shows all instrument values
+[2/71] [chromium] › tests/dashboard.spec.ts:16:5 › page loads with correct title and header
+[3/71] [chromium] › tests/dashboard.spec.ts:22:5 › no JS errors on load
+[4/71] [chromium] › tests/dashboard.spec.ts:40:5 › live data simulation is running
+[5/71] [chromium] › tests/dashboard.spec.ts:47:5 › start timer shows initial state
+[6/71] [chromium] › tests/dashboard.spec.ts:52:5 › start timer starts and stops countdown
+[7/71] [chromium] › tests/dashboard.spec.ts:59:5 › start timer preset buttons reset the clock
+[8/71] [chromium] › tests/dashboard.spec.ts:68:5 › start timer sync button works without error
+[9/71] [chromium] › tests/dashboard.spec.ts:78:5 › performance panel shows VMG, polar %, and wind shift
+[10/71] [chromium] › tests/dashboard.spec.ts:87:5 › performance panel alarm toggle works
+[11/71] [chromium] › tests/dashboard.spec.ts:98:5 › map panel renders with Leaflet container
+[12/71] [chromium] › tests/dashboard.spec.ts:104:5 › laylines toggle switches ON and OFF
+[13/71] [chromium] › tests/dashboard.spec.ts:114:5 › range rings toggle switches ON and OFF
+[14/71] [chromium] › tests/dashboard.spec.ts:124:5 › fit fleet button is clickable without error
+[15/71] [chromium] › tests/dashboard.spec.ts:134:5 › ruler mode activates on click and cursor becomes crosshair
+[16/71] [chromium] › tests/dashboard.spec.ts:143:5 › ruler mode returns to Pan on second click
+[17/71] [chromium] › tests/dashboard.spec.ts:168:5 › ruler: clicking map in ruler mode shows Clear button
+[18/71] [chromium] › tests/dashboard.spec.ts:180:5 › ruler: second click creates measurement, Clear removes it
+[19/71] [chromium] › tests/dashboard.spec.ts:197:5 › ruler: switching to Pan mode clears measurement
+[20/71] [chromium] › tests/dashboard.spec.ts:213:5 › tactical table shows all four competitors
+[21/71] [chromium] › tests/dashboard.spec.ts:221:5 › tactical table shows correct distances and bearings
+[22/71] [chromium] › tests/dashboard.spec.ts:229:5 › tactical table shows higher/faster badges
+[23/71] [chromium] › tests/dashboard.spec.ts:238:5 › waypoint panel is visible with empty state message
+[24/71] [chromium] › tests/dashboard.spec.ts:244:5 › ping adds a mark entry to the list
+[25/71] [chromium] › tests/dashboard.spec.ts:251:5 › active mark shows TTM and VMG metrics after ping
+[26/71] [chromium] › tests/dashboard.spec.ts:258:5 › delete mark removes it from the list
+[27/71] [chromium] › tests/dashboard.spec.ts:266:5 › mark type cycles through Mark → Start P → Start S
+[28/71] [chromium] › tests/dashboard.spec.ts:276:5 › rounding direction toggles between Port and Stbd
+[29/71] [chromium] › tests/dashboard.spec.ts:284:5 › next/prev cycle active mark when multiple marks exist
+[30/71] [chromium] › tests/dashboard.spec.ts:293:5 › marks persist across page reload via localStorage
+[31/71] [chromium] › tests/dashboard.spec.ts:301:5 › add mark mode: clicking map drops a waypoint
+[32/71] [chromium] › tests/dashboard.spec.ts:315:5 › wind trend panel shows charts
+[33/71] [chromium] › tests/dashboard.spec.ts:325:5 › HRRR wind panel shows model vs reality delta
+[34/71] [chromium] › tests/dashboard.spec.ts:334:5 › ? button opens guide modal
+[35/71] [chromium] › tests/dashboard.spec.ts:343:5 › guide modal can be closed
+[36/71] [chromium] › tests/dashboard.spec.ts:350:5 › guide modal × button closes it
+[37/71] [chromium] › tests/dashboard.spec.ts:357:5 › guide covers all major sections
+[38/71] [chromium] › tests/dashboard.spec.ts:366:5 › timeline panel is visible
+[39/71] [chromium] › tests/dashboard.spec.ts:372:5 › timeline shows LIVE badge in header
+[40/71] [chromium] › tests/dashboard.spec.ts:377:5 › timeline scrubber appears after a few frames
+[41/71] [chromium] › tests/dashboard.spec.ts:384:5 › start race creates an active session
+[42/71] [chromium] › tests/dashboard.spec.ts:390:5 › end race closes the session and shows saved races
+[43/71] [chromium] › tests/dashboard.spec.ts:401:5 › race sessions persist across page reload
+[44/71] [chromium] › tests/dashboard.spec.ts:411:5 › export all csv button triggers download
+[45/71] [chromium] › tests/dashboard.spec.ts:421:5 › timeline scrubber entering replay shows REPLAY badge
+[46/71] [chromium] › tests/dashboard.spec.ts:433:5 › ▶ Live button returns from replay to live
+[47/71] [chromium] › tests/guide_marks.spec.ts:5:5 › marks section in guide
+[48/71] [chromium] › tests/show_guide.spec.ts:5:5 › show guide location
+[49/71] [chromium] › tests/tablet_audit.spec.ts:38:5 › ipad portrait 768x1024
+[50/71] [chromium] › tests/tablet_audit.spec.ts:42:5 › ipad landscape 1024x768
+[51/71] [chromium] › tests/windy.spec.ts:15:5 › ⤢ Full button is visible on Race Chart toolbar
+[52/71] [chromium] › tests/windy.spec.ts:19:5 › ⤢ Full button has adequate touch target
+[53/71] [chromium] › tests/windy.spec.ts:28:5 › clicking ⤢ Full opens fullscreen wind map
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[54/71] [chromium] › tests/windy.spec.ts:38:5 › fullscreen map shows LIVE badge when not forecasting
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[55/71] [chromium] › tests/windy.spec.ts:43:5 › dashboard panels are hidden in fullscreen mode
+[56/71] [chromium] › tests/windy.spec.ts:54:5 › ✕ Close button returns to dashboard
+[57/71] [chromium] › tests/windy.spec.ts:63:5 › ✕ Close button has 44px touch target
+[58/71] [chromium] › tests/windy.spec.ts:74:5 › Leaflet map renders inside fullscreen mode
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[59/71] [chromium] › tests/windy.spec.ts:80:5 › fullscreen map fills the viewport
+[60/71] [chromium] › tests/windy.spec.ts:90:5 › layer switcher globe button is visible in fullscreen
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[61/71] [chromium] › tests/windy.spec.ts:96:5 › clicking globe shows Wind/Rain/Temp buttons
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[62/71] [chromium] › tests/windy.spec.ts:104:5 › layer buttons have adequate touch targets
+[63/71] [chromium] › tests/windy.spec.ts:113:5 › selecting Rain layer closes the switcher panel
+[64/71] [chromium] › tests/windy.spec.ts:123:5 › forecast scrubber (range input) is present in fullscreen
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[65/71] [chromium] › tests/windy.spec.ts:129:5 › Play button is visible in fullscreen forecast timeline
+[66/71] [chromium] › tests/windy.spec.ts:134:5 › step back ◀ and step forward ▶ buttons are present
+[67/71] [chromium] › tests/windy.spec.ts:141:5 › Live button is present in forecast controls
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[68/71] [chromium] › tests/windy.spec.ts:146:5 › advancing forecast shows +hr badge
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[69/71] [chromium] › tests/windy.spec.ts:161:5 › Live button snaps back to live
+[70/71] [chromium] › tests/windy.spec.ts:177:5 › Play/Stop button toggles correctly
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+[71/71] [chromium] › tests/windy.spec.ts:189:5 › existing dashboard still works after fullscreen round-trip
+[WebServer] [browser] Uncaught TypeError: Cannot read properties of undefined (reading '_leaflet_pos')
+
+  71 passed (1.2m)

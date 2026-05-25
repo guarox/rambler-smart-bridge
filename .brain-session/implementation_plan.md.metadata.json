@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Implementation plan for weather routing integration, including PredictWind API routes and NOAA HRRR GRIB2 downloading and parsing for the Great Lakes.",
+  "updatedAt": "2026-05-25T13:38:22.322496Z",
+  "requestFeedback": true
+}

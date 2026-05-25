@@ -1,0 +1,90 @@
+Retrieving project…
+Deploying guaroxs-projects/rambler99
+Uploading [--------------------] (0.0B/593.6KB)
+Uploading [=====---------------] (157.4KB/593.6KB)
+Uploading [==========----------] (301.4KB/593.6KB)
+Uploading [===============-----] (445.4KB/593.6KB)
+Uploading [====================] (593.6KB/593.6KB)
+  Inspect     https://vercel.com/guaroxs-projects/rambler99/8Ld2pHdGChHGdBEaeLPHAsWFAeZj
+▲ Production  https://rambler99-m6pu8q8ge-guaroxs-projects.vercel.app
+Building…
+Building…
+Running build in Washington, D.C., USA (East) – iad1
+Build machine configuration: 2 cores, 8 GB
+Retrieving list of deployment files...
+Downloading 122 deployment files...
+Restored build cache from previous deployment (Gpwoe36AchvAod6x6iVRdyzKVz2Z)
+Running "vercel build"
+Vercel CLI 54.4.1
+Installing dependencies...
+up to date in 810ms
+146 packages are looking for funding
+run `npm fund` for details
+Detected Next.js version: 16.2.6
+Running "npm run build"
+> dashboard@0.1.0 build
+> next build
+Applying modifyConfig from Vercel
+▲ Next.js 16.2.6 (Turbopack)
+Creating an optimized production build ...
+Turbopack build encountered 1 warnings:
+./next.config.ts
+Encountered unexpected file in NFT list
+A file was traced that indicates that the whole project was traced unintentionally. Somewhere in the import trace below, there are:
+- filesystem operations (like path.join, path.resolve or fs.readFile), or
+- very dynamic requires (like require('./' + foo)).
+To resolve this, you can
+- remove them if possible, or
+- only use them in development, or
+- make sure they are statically scoped to some subfolder: path.join(process.cwd(), 'data', bar), or
+- add ignore comments: path.join(/*turbopackIgnore: true*/ process.cwd(), bar)
+Import trace:
+App Route:
+./next.config.ts
+./app/api/weather/hrrr/route.ts
+✓ Compiled successfully in 5.4s
+Running TypeScript ...
+Finished TypeScript in 5.5s ...
+Collecting page data using 1 worker ...
+Generating static pages using 1 worker (0/7) ...
+Generating static pages using 1 worker (1/7)
+Generating static pages using 1 worker (3/7)
+Generating static pages using 1 worker (5/7)
+✓ Generating static pages using 1 worker (7/7) in 280ms
+Finalizing page optimization ...
+Running onBuildComplete from Vercel
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/predictwind
+├ ○ /api/weather/hrrr
+└ ○ /sailchart-print
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+Build Completed in /vercel/output [14s]
+Deploying outputs...
+▲ Production  https://rambler99-m6pu8q8ge-guaroxs-projects.vercel.app
+Completing…
+▲ Aliased     https://rambler99.vercel.app
+{
+  "status": "ok",
+  "deployment": {
+    "id": "dpl_8Ld2pHdGChHGdBEaeLPHAsWFAeZj",
+    "url": "https://rambler99-m6pu8q8ge-guaroxs-projects.vercel.app",
+    "inspectorUrl": "https://vercel.com/guaroxs-projects/rambler99/8Ld2pHdGChHGdBEaeLPHAsWFAeZj",
+    "readyState": "READY",
+    "target": "production",
+    "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_8Ld2pHdGChHGdBEaeLPHAsWFAeZj"
+  },
+  "message": "Deployment rambler99-m6pu8q8ge-guaroxs-projects.vercel.app ready.",
+  "next": [
+    {
+      "command": "vercel inspect rambler99-m6pu8q8ge-guaroxs-projects.vercel.app",
+      "when": "Inspect deployment"
+    },
+    {
+      "command": "vercel deploy --prod",
+      "when": "Promote to production"
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+
+Running 73 tests using 3 workers
+
+[1/73] [chromium] › tests/dashboard.spec.ts:22:5 › no JS errors on load
+[2/73] [chromium] › tests/dashboard.spec.ts:16:5 › page loads with correct title and header
+[3/73] [chromium] › tests/dashboard.spec.ts:31:5 › own boat panel shows all instrument values
+[4/73] [chromium] › tests/dashboard.spec.ts:40:5 › live data simulation is running
+[5/73] [chromium] › tests/dashboard.spec.ts:47:5 › start timer shows initial state
+[6/73] [chromium] › tests/dashboard.spec.ts:52:5 › start timer starts and stops countdown
+[7/73] [chromium] › tests/dashboard.spec.ts:59:5 › start timer preset buttons reset the clock
+[8/73] [chromium] › tests/dashboard.spec.ts:68:5 › start timer sync button works without error
+[9/73] [chromium] › tests/dashboard.spec.ts:78:5 › performance panel shows VMG, polar %, and wind shift
+[10/73] [chromium] › tests/dashboard.spec.ts:87:5 › performance panel alarm toggle works
+[11/73] [chromium] › tests/dashboard.spec.ts:98:5 › map panel renders with Leaflet container
+[12/73] [chromium] › tests/dashboard.spec.ts:104:5 › laylines toggle switches ON and OFF
+[13/73] [chromium] › tests/dashboard.spec.ts:114:5 › range rings toggle switches ON and OFF
+[14/73] [chromium] › tests/dashboard.spec.ts:124:5 › fit fleet button is clickable without error
+[15/73] [chromium] › tests/dashboard.spec.ts:134:5 › ruler mode activates on click and cursor becomes crosshair
+[16/73] [chromium] › tests/dashboard.spec.ts:143:5 › ruler mode returns to Pan on second click
+[17/73] [chromium] › tests/dashboard.spec.ts:168:5 › ruler: clicking map in ruler mode shows Clear button
+[18/73] [chromium] › tests/dashboard.spec.ts:180:5 › ruler: second click creates measurement, Clear removes it
+[19/73] [chromium] › tests/dashboard.spec.ts:197:5 › ruler: switching to Pan mode clears measurement
+[20/73] [chromium] › tests/dashboard.spec.ts:213:5 › tactical table shows all four competitors
+[21/73] [chromium] › tests/dashboard.spec.ts:221:5 › tactical table shows correct distances and bearings
+[22/73] [chromium] › tests/dashboard.spec.ts:229:5 › tactical table shows higher/faster badges
+[23/73] [chromium] › tests/dashboard.spec.ts:238:5 › waypoint panel is visible with empty state message
+[24/73] [chromium] › tests/dashboard.spec.ts:244:5 › ping adds a mark entry to the list
+[25/73] [chromium] › tests/dashboard.spec.ts:251:5 › active mark shows TTM and VMG metrics after ping
+[26/73] [chromium] › tests/dashboard.spec.ts:258:5 › delete mark removes it from the list
+[27/73] [chromium] › tests/dashboard.spec.ts:266:5 › mark type cycles through Mark → Start P → Start S
+[28/73] [chromium] › tests/dashboard.spec.ts:276:5 › rounding direction toggles between Port and Stbd
+[29/73] [chromium] › tests/dashboard.spec.ts:284:5 › next/prev cycle active mark when multiple marks exist
+[30/73] [chromium] › tests/dashboard.spec.ts:293:5 › marks persist across page reload via localStorage
+[31/73] [chromium] › tests/dashboard.spec.ts:301:5 › add mark mode: clicking map drops a waypoint
+[32/73] [chromium] › tests/dashboard.spec.ts:315:5 › wind trend panel shows charts
+[33/73] [chromium] › tests/dashboard.spec.ts:325:5 › HRRR wind panel shows model vs reality delta
+[34/73] [chromium] › tests/dashboard.spec.ts:334:5 › ? button opens guide modal
+[35/73] [chromium] › tests/dashboard.spec.ts:343:5 › guide modal can be closed
+[36/73] [chromium] › tests/dashboard.spec.ts:350:5 › guide modal × button closes it
+[37/73] [chromium] › tests/dashboard.spec.ts:357:5 › guide covers all major sections
+[38/73] [chromium] › tests/dashboard.spec.ts:366:5 › timeline panel is visible
+[39/73] [chromium] › tests/dashboard.spec.ts:372:5 › timeline shows LIVE badge in header
+[40/73] [chromium] › tests/dashboard.spec.ts:377:5 › timeline scrubber appears after a few frames
+[41/73] [chromium] › tests/dashboard.spec.ts:384:5 › start race creates an active session
+[42/73] [chromium] › tests/dashboard.spec.ts:390:5 › end race closes the session and shows saved races
+[43/73] [chromium] › tests/dashboard.spec.ts:401:5 › race sessions persist across page reload
+[44/73] [chromium] › tests/dashboard.spec.ts:411:5 › export all csv button triggers download
+[45/73] [chromium] › tests/dashboard.spec.ts:421:5 › timeline scrubber entering replay shows REPLAY badge
+[46/73] [chromium] › tests/dashboard.spec.ts:433:5 › ▶ Live button returns from replay to live
+[47/73] [chromium] › tests/guide_marks.spec.ts:5:5 › marks section in guide
+[48/73] [chromium] › tests/predictwind.spec.ts:14:5 › PredictWind settings modal and routing works
+[49/73] [chromium] › tests/show_guide.spec.ts:5:5 › show guide location
+[50/73] [chromium] › tests/tablet_audit.spec.ts:38:5 › ipad portrait 768x1024
+[51/73] [chromium] › tests/tablet_audit.spec.ts:42:5 › ipad landscape 1024x768
+[52/73] [chromium] › tests/weather.spec.ts:3:5 › weather API endpoint returns valid HRRR grid data
+[53/73] [chromium] › tests/windy.spec.ts:15:5 › ⤢ Full button is visible on Race Chart toolbar
+[54/73] [chromium] › tests/windy.spec.ts:19:5 › ⤢ Full button has adequate touch target
+[55/73] [chromium] › tests/windy.spec.ts:28:5 › clicking ⤢ Full opens fullscreen wind map
+[56/73] [chromium] › tests/windy.spec.ts:38:5 › fullscreen map shows LIVE badge when not forecasting
+[57/73] [chromium] › tests/windy.spec.ts:43:5 › dashboard panels are hidden in fullscreen mode
+[58/73] [chromium] › tests/windy.spec.ts:54:5 › ✕ Close button returns to dashboard
+[59/73] [chromium] › tests/windy.spec.ts:63:5 › ✕ Close button has 44px touch target
+[60/73] [chromium] › tests/windy.spec.ts:74:5 › Leaflet map renders inside fullscreen mode
+[61/73] [chromium] › tests/windy.spec.ts:80:5 › fullscreen map fills the viewport
+[62/73] [chromium] › tests/windy.spec.ts:90:5 › layer switcher globe button is visible in fullscreen
+[63/73] [chromium] › tests/windy.spec.ts:96:5 › clicking globe shows Wind/Rain/Temp buttons
+[64/73] [chromium] › tests/windy.spec.ts:104:5 › layer buttons have adequate touch targets
+[65/73] [chromium] › tests/windy.spec.ts:113:5 › selecting Rain layer closes the switcher panel
+[66/73] [chromium] › tests/windy.spec.ts:123:5 › forecast scrubber (range input) is present in fullscreen
+[67/73] [chromium] › tests/windy.spec.ts:129:5 › Play button is visible in fullscreen forecast timeline
+[68/73] [chromium] › tests/windy.spec.ts:134:5 › step back ◀ and step forward ▶ buttons are present
+[69/73] [chromium] › tests/windy.spec.ts:141:5 › Live button is present in forecast controls
+[70/73] [chromium] › tests/windy.spec.ts:146:5 › advancing forecast shows +hr badge
+[71/73] [chromium] › tests/windy.spec.ts:161:5 › Live button snaps back to live
+[72/73] [chromium] › tests/windy.spec.ts:177:5 › Play/Stop button toggles correctly
+[73/73] [chromium] › tests/windy.spec.ts:189:5 › existing dashboard still works after fullscreen round-trip
+  73 passed (47.0s)
