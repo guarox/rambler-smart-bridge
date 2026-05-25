@@ -51,6 +51,28 @@ function roundTo(num: number, decimals: number): number {
   return Math.round(num * factor) / factor;
 }
 
+function getRoutingCheckpoints(startLat: number, startLon: number, endLat: number, endLon: number): [number, number][] {
+  const points: [number, number][] = [[startLat, startLon]];
+
+  // Detect route from Southern/Central Lake Michigan up to Straits of Mackinac / Lake Huron
+  if (startLat < 45.5 && startLon < -85.5 && endLat > 45.7 && endLon > -85.1) {
+    if (startLat < 45.05) {
+      points.push([45.05, -86.25]); // Manitou Passage South Channel
+    }
+    points.push([45.77, -85.15]); // Grays Reef Passage Channel
+  }
+  // Reverse: Straits of Mackinac down to Southern Lake Michigan
+  else if (startLat > 45.7 && startLon > -85.1 && endLat < 45.5 && endLon < -85.5) {
+    points.push([45.77, -85.15]); // Grays Reef Passage Channel
+    if (endLat < 45.05) {
+      points.push([45.05, -86.25]); // Manitou Passage South Channel
+    }
+  }
+
+  points.push([endLat, endLon]);
+  return points;
+}
+
 function calculatePredictWindRouteClient(
   startLat: number,
   startLon: number,
@@ -60,36 +82,55 @@ function calculatePredictWindRouteClient(
 ): Record<string, any> {
   const selectedModels = models.length > 0 ? models : ["PWG", "PWE", "ECMWF", "GFS"];
   const routes: Record<string, any> = {};
+  const checkpoints = getRoutingCheckpoints(startLat, startLon, endLat, endLon);
 
   selectedModels.forEach((model, index) => {
     const points: [number, number][] = [];
-    const steps = 15;
     
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const lat = startLat + (endLat - startLat) * t;
-      const lon = startLon + (endLon - startLon) * t;
-      const curveOffset = Math.sin(t * Math.PI) * 0.12 * (index % 2 === 0 ? 1 : -1);
-      const modelLat = lat + curveOffset * 0.5;
-      const modelLon = lon + curveOffset;
-      points.push([modelLat, modelLon]);
+    // Segment-by-segment interpolation between gates
+    for (let s = 0; s < checkpoints.length - 1; s++) {
+      const pStart = checkpoints[s];
+      const pEnd = checkpoints[s + 1];
+      
+      const segDist = haversineDistance(pStart[0], pStart[1], pEnd[0], pEnd[1]);
+      const steps = Math.max(5, Math.round(segDist / 15));
+      
+      for (let i = 0; i <= steps; i++) {
+        if (s > 0 && i === 0) continue; // avoid duplicating checkpoint points
+        const t = i / steps;
+        const lat = pStart[0] + (pEnd[0] - pStart[0]) * t;
+        const lon = pStart[1] + (pEnd[1] - pStart[1]) * t;
+        
+        // Model-specific curve variation (isochrone simulation)
+        const curveOffset = Math.sin(t * Math.PI) * 0.05 * (index % 2 === 0 ? 1 : -1);
+        const modelLat = lat + curveOffset * 0.3;
+        const modelLon = lon + curveOffset;
+        points.push([modelLat, modelLon]);
+      }
+    }
+
+    // Ensure the final point is exactly the destination
+    if (points.length > 0) {
+      points[points.length - 1] = [endLat, endLon];
     }
 
     const tacksGybes = [];
-    if (steps > 5) {
+    if (points.length > 8) {
+      const t1Idx = Math.floor(points.length * 0.3);
       tacksGybes.push({
-        lat: points[Math.floor(steps * 0.3)][0],
-        lon: points[Math.floor(steps * 0.3)][1],
+        lat: points[t1Idx][0],
+        lon: points[t1Idx][1],
         type: "tack",
         twa: 40 + (index * 2),
-        time: "+2h 15m"
+        time: "+3h 15m"
       });
+      const t2Idx = Math.floor(points.length * 0.7);
       tacksGybes.push({
-        lat: points[Math.floor(steps * 0.7)][0],
-        lon: points[Math.floor(steps * 0.7)][1],
+        lat: points[t2Idx][0],
+        lon: points[t2Idx][1],
         type: "tack",
         twa: 42 + (index * 1.5),
-        time: "+5h 40m"
+        time: "+8h 45m"
       });
     }
 
@@ -115,6 +156,7 @@ function calculatePredictWindRouteClient(
 
   return routes;
 }
+
 
 export default function Home() {
   // ── Route / waypoints ──────────────────────────────────────────────────────
