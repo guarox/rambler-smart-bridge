@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "application_design_center": {
+      "command": "",
+      "args": null,
+      "cwd": "",
+      "env": null,
+      "serverUrl": "https://designcenter.googleapis.com/mcp"
+    },
+    "gemini_cloud_assist": {
+      "command": "",
+      "args": null,
+      "cwd": "",
+      "env": null,
+      "serverUrl": "https://geminicloudassist.googleapis.com/mcp"
+    }
+  }
+}

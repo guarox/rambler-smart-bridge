@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "web-accessibility-mcpserver": {
+      "command": "node",
+      "args": [
+        "/Users/guarox/.gemini/extensions/web-accessibility/mcp-server/dist/index.js"
+      ],
+      "cwd": "",
+      "env": null
+    }
+  }
+}

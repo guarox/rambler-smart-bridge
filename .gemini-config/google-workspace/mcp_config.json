@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "google-workspace": {
+      "command": "node",
+      "args": [
+        "dist/index.js",
+        "--use-dot-names"
+      ],
+      "cwd": "/Users/guarox/.gemini/extensions/google-workspace",
+      "env": null
+    }
+  }
+}

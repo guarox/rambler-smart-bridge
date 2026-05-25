@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "firebase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "firebase-tools@latest",
+        "mcp"
+      ],
+      "cwd": "",
+      "env": {
+        "IS_GEMINI_CLI_EXTENSION": "true"
+      }
+    }
+  }
+}

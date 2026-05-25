@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "VertexMcpServer": {
+      "command": "/Users/guarox/.gemini/extensions/vertex/run.sh",
+      "args": [],
+      "cwd": "",
+      "env": null
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "nanobanana": {
+      "command": "node",
+      "args": [
+        "/Users/guarox/.gemini/extensions/nanobanana/mcp-server/dist/index.js"
+      ],
+      "cwd": "",
+      "env": {}
+    }
+  }
+}

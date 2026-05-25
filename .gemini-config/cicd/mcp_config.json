@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "cicd-mcp": {
+      "command": "/Users/guarox/.gemini/extensions/cicd/cicd-mcp-server",
+      "args": null,
+      "cwd": "",
+      "env": null
+    }
+  }
+}
