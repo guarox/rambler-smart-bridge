@@ -1,0 +1,1976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rambler USA 99 — System Guide & Interactive Reference</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap');
+
+    :root {
+      /* Theme colors (Default Dark Mode) */
+      --bg: #060814;
+      --card-bg: rgba(17, 24, 39, 0.55);
+      --card-border: rgba(255, 255, 255, 0.05);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      
+      --accent: #2563eb;
+      --accent-glow: rgba(37, 99, 235, 0.35);
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.3);
+      
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.2);
+      --warning: #f59e0b;
+      --warning-glow: rgba(245, 158, 11, 0.2);
+      --danger: #ef4444;
+      --danger-glow: rgba(239, 68, 68, 0.2);
+      
+      --terminal-bg: #090d16;
+      --terminal-text: #22d3ee;
+      --terminal-border: rgba(34, 211, 238, 0.15);
+      
+      --path-power: #ef4444;
+      --path-data: #2563eb;
+      --path-nmea: #f59e0b;
+      --path-poe: #06b6d4;
+    }
+
+    /* Night Mode overrides (Deep Red/Black) */
+    [data-theme="night"] {
+      --bg: #0a0101;
+      --card-bg: rgba(30, 5, 5, 0.6);
+      --card-border: rgba(239, 68, 68, 0.1);
+      --text: #fca5a5;
+      --text-muted: #b91c1c;
+      
+      --accent: #ef4444;
+      --accent-glow: rgba(239, 68, 68, 0.4);
+      --cyan: #b91c1c;
+      --cyan-glow: rgba(185, 28, 28, 0.3);
+      
+      --success: #b91c1c;
+      --success-glow: rgba(185, 28, 28, 0.2);
+      --warning: #991b1b;
+      --warning-glow: rgba(153, 27, 27, 0.2);
+      --danger: #dc2626;
+      --danger-glow: rgba(220, 38, 38, 0.3);
+      
+      --terminal-bg: #100202;
+      --terminal-text: #f87171;
+      --terminal-border: rgba(248, 113, 113, 0.2);
+      
+      --path-power: #ef4444;
+      --path-data: #b91c1c;
+      --path-nmea: #991b1b;
+      --path-poe: #dc2626;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      padding: 2.5rem 1.5rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 2.5rem;
+      gap: 1.5rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .brand-logo {
+      font-size: 2.5rem;
+    }
+
+    .brand-title h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+
+    [data-theme="night"] .brand-title h1 {
+      color: #ef4444;
+    }
+
+    .brand-title h1 span {
+      color: var(--cyan);
+    }
+
+    .brand-title p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 400;
+      margin-top: 0.25rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .badge {
+      background-color: var(--success);
+      color: #ffffff;
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      box-shadow: 0 0 15px var(--success-glow);
+    }
+
+    /* Buttons */
+    .btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .btn-red {
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-red:hover {
+      background: #dc2626;
+      border-color: #dc2626;
+      box-shadow: 0 0 15px rgba(220, 38, 38, 0.4);
+    }
+
+    /* Navigation Tabs */
+    .tabs-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.75rem;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.75rem 1.25rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 0.5rem;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab-btn.active {
+      color: #ffffff;
+      background: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    [data-theme="night"] .tab-btn.active {
+      color: #ffffff;
+      background: #b91c1c;
+      box-shadow: 0 0 15px rgba(185, 28, 28, 0.5);
+    }
+
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards & Layout */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .card h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      letter-spacing: -0.01em;
+    }
+
+    .card h2::before {
+      content: "";
+      display: block;
+      width: 4px;
+      height: 1.5rem;
+      background-color: var(--cyan);
+      border-radius: 2px;
+      box-shadow: 0 0 8px var(--cyan-glow);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+      .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+    }
+
+    @media (min-width: 1024px) {
+      .grid-3 { grid-template-columns: 2fr 1fr 1fr; }
+    }
+
+    /* Banners & Statuses */
+    .alert {
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      border: 1px solid transparent;
+    }
+
+    .alert-danger {
+      background-color: rgba(239, 68, 68, 0.08);
+      border-color: rgba(239, 68, 68, 0.25);
+      color: #fca5a5;
+    }
+
+    .alert-warning {
+      background-color: rgba(245, 158, 11, 0.08);
+      border-color: rgba(245, 158, 11, 0.25);
+      color: #fde68a;
+    }
+
+    .alert-success {
+      background-color: rgba(16, 185, 129, 0.08);
+      border-color: rgba(16, 185, 129, 0.25);
+      color: #a7f3d0;
+    }
+
+    .alert-icon {
+      font-size: 1.3rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    th {
+      background-color: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 2px solid var(--card-border);
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--card-border);
+      font-size: 0.9rem;
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .text-val {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--cyan);
+      font-weight: 600;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(0, 0, 0, 0.35);
+      color: #22d3ee;
+      padding: 0.15rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    [data-theme="night"] code {
+      color: #f87171;
+    }
+
+    /* Interactive Diagrams */
+    .diagram-panel {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      .diagram-panel {
+        grid-template-columns: 3fr 1fr;
+      }
+    }
+
+    .diagram-view {
+      background: #0b0f19;
+      border: 1px solid var(--card-border);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .diagram-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .info-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      height: 100%;
+      min-height: 250px;
+    }
+
+    .info-box h3 {
+      font-size: 1.1rem;
+      color: var(--cyan);
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.5rem;
+    }
+
+    .info-box p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .info-meta {
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px dashed var(--card-border);
+    }
+
+    .info-meta-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.35rem;
+    }
+
+    /* SVG Interactive Styling */
+    .svg-node {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .svg-node rect, .svg-node circle, .svg-node ellipse {
+      transition: fill 0.3s ease, stroke 0.3s ease, filter 0.3s ease;
+    }
+
+    .svg-node:hover rect, .svg-node.active rect {
+      fill-opacity: 0.85;
+      stroke-width: 2.5px !important;
+      filter: drop-shadow(0 0 6px var(--cyan-glow));
+    }
+
+    .svg-cable {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .svg-cable line, .svg-cable path {
+      transition: stroke 0.3s ease, stroke-width 0.3s ease, filter 0.3s ease;
+    }
+
+    .svg-cable:hover line, .svg-cable:hover path,
+    .svg-cable.active line, .svg-cable.active path {
+      stroke-width: 4px !important;
+      filter: drop-shadow(0 0 8px var(--accent-glow));
+    }
+
+    /* Checklists */
+    .checklist-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .checklist-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .checklist-group h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    [data-theme="night"] .checklist-group h3 {
+      color: #ef4444;
+    }
+
+    .checklist-list {
+      list-style: none;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+      cursor: pointer;
+    }
+
+    .checklist-item:last-child {
+      border-bottom: none;
+    }
+
+    .checklist-checkbox {
+      width: 1.15rem;
+      height: 1.15rem;
+      border: 2px solid var(--card-border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+      background: rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease;
+    }
+
+    .checklist-item:hover .checklist-checkbox {
+      border-color: var(--accent);
+    }
+
+    .checklist-item.checked .checklist-checkbox {
+      background: var(--success);
+      border-color: var(--success);
+    }
+
+    .checklist-item.checked .checklist-checkbox::after {
+      content: "✓";
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 900;
+    }
+
+    .checklist-label {
+      font-size: 0.925rem;
+      user-select: none;
+    }
+
+    .checklist-item.checked .checklist-label {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    /* Terminal Simulator */
+    .terminal-container {
+      background: var(--terminal-bg);
+      border: 1px solid var(--terminal-border);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .terminal-header {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 0.35rem;
+    }
+
+    .terminal-dot {
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 50%;
+    }
+
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .terminal-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .terminal-body {
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--terminal-text);
+      min-height: 280px;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .terminal-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .term-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .term-btn:hover, .term-btn.active {
+      color: var(--terminal-text);
+      background: rgba(34, 211, 238, 0.08);
+      border-color: var(--terminal-text);
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 15px;
+      background: var(--terminal-text);
+      animation: blink 1s step-end infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      from, to { background-color: transparent }
+      50% { background-color: var(--terminal-text) }
+    }
+
+    /* Troubleshooting Matrix Filter */
+    .search-container {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan-glow);
+    }
+
+    /* Print styling */
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        color: #111111 !important;
+        padding: 0 !important;
+      }
+      header, .tabs-nav, .controls, .search-container, .terminal-selector, .btn {
+        display: none !important;
+      }
+      .card {
+        background: #ffffff !important;
+        border: 1px solid #cccccc !important;
+        color: #111111 !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        page-break-inside: avoid;
+        margin-bottom: 2rem;
+      }
+      .card h2 {
+        color: #1e3a5f !important;
+      }
+      .card h2::before {
+        background-color: #1e3a5f !important;
+      }
+      .tab-panel {
+        display: block !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .diagram-panel {
+        display: block !important;
+      }
+      .diagram-view {
+        background: #ffffff !important;
+        border: 1px solid #cccccc !important;
+      }
+      .diagram-info {
+        display: none !important;
+      }
+      table, th, td {
+        border-color: #cccccc !important;
+        color: #111111 !important;
+      }
+      th {
+        background-color: #f3f4f6 !important;
+      }
+      code {
+        background-color: #f3f4f6 !important;
+        color: #111827 !important;
+        border-color: #cccccc !important;
+      }
+      svg {
+        filter: none !important;
+      }
+      .svg-node rect { fill: #f3f4f6 !important; stroke: #666666 !important; }
+      .svg-node text { fill: #111111 !important; }
+      .svg-cable path, .svg-cable line { stroke: #333333 !important; }
+      .checklist-checkbox {
+        border-color: #666666 !important;
+      }
+      .checklist-item.checked .checklist-checkbox {
+        background: #ffffff !important;
+        border-color: #111111 !important;
+      }
+      .checklist-item.checked .checklist-checkbox::after {
+        color: #111111 !important;
+      }
+      .checklist-item.checked .checklist-label {
+        color: #666666 !important;
+      }
+      .terminal-container {
+        background: #f9fafb !important;
+        border-color: #cccccc !important;
+        box-shadow: none !important;
+      }
+      .terminal-header {
+        display: none !important;
+      }
+      .terminal-body {
+        color: #111827 !important;
+        background: #ffffff !important;
+        max-height: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Master Header -->
+    <header>
+      <div class="brand">
+        <span class="brand-logo">⛵</span>
+        <div class="brand-title">
+          <h1>Rambler <span>USA 99</span></h1>
+          <p>Smart Bridge Master Reference & Diagnostic Guide</p>
+        </div>
+      </div>
+      <div class="controls">
+        <span class="badge" id="status-badge">System Configured</span>
+        <button class="btn btn-red" id="night-toggle" onclick="toggleNightMode()">
+          <span id="night-icon">👁️‍🗨️</span> <span id="night-text">Night Mode (Red)</span>
+        </button>
+        <button class="btn" onclick="window.print()">
+          <span>🖨️</span> Print PDF
+        </button>
+      </div>
+    </header>
+
+    <!-- OS Warning Banner -->
+    <div class="alert alert-danger">
+      <span class="alert-icon">⚠️</span>
+      <div>
+        <strong>Critical System Fix Loaded:</strong> Raspberry Pi OS Bookworm has been reconfigured to manage SocketCAN links via <code>systemd-networkd</code> (at <code>/etc/systemd/network/80-can.network</code>). The legacy network configuration has been deprecated as Bookworm completely overrides it via NetworkManager on boot.
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab(event, 'tab-dashboard')">Dashboard</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-wiring')">Wiring & Power</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-network')">Network & Data</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-checklists')">Task Checklists</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-terminal')">Diagnostic Console</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-trouble')">Troubleshooting & Mapping</button>
+    </nav>
+
+    <!-- TAB 1: SYSTEM DASHBOARD -->
+    <div id="tab-dashboard" class="tab-panel active">
+      <div class="grid-3">
+        <!-- Main Quick Ref Card -->
+        <div class="card">
+          <h2>Access Credentials & Ports</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Service / Resource</th>
+                <th>Access Address</th>
+                <th>Credentials / Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Dashboard URL (On Boat)</strong></td>
+                <td><span class="text-val">http://192.168.5.1</span></td>
+                <td>Served on port 80 via nginx</td>
+              </tr>
+              <tr>
+                <td><strong>Dashboard URL (Remote)</strong></td>
+                <td><span class="text-val">https://rambler99.vercel.app</span></td>
+                <td>Production deployment (features simulator)</td>
+              </tr>
+              <tr>
+                <td><strong>Signal K Server UI</strong></td>
+                <td><span class="text-val">http://192.168.5.1:3000</span></td>
+                <td>N2K data parser (mDNS: <code>rambler.local:3000</code>)</td>
+              </tr>
+              <tr>
+                <td><strong>SSH Shell Access</strong></td>
+                <td><span class="text-val">ssh guarox@rambler.local</span></td>
+                <td>Password: <code>2wsx#edC</code> (or via IP 192.168.5.1)</td>
+              </tr>
+              <tr>
+                <td><strong>Local AP WiFi SSID</strong></td>
+                <td><span class="text-val">Rambler_Net</span></td>
+                <td>Password: <code>RAMBLER2026</code> (broadcast on wlan0)</td>
+              </tr>
+              <tr>
+                <td><strong>Wired Static (Homelab)</strong></td>
+                <td><span class="text-val">192.168.4.100</span></td>
+                <td>For bench testing / dockside connection</td>
+              </tr>
+              <tr>
+                <td><strong>Wired Static (Boat/WAN)</strong></td>
+                <td><span class="text-val">192.168.100.100</span></td>
+                <td>Connects upstream to XTAR-Link (gateway 100.1)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Hardware specs -->
+        <div class="card">
+          <h2>Core Hardware Specs</h2>
+          <table style="font-size: 0.85rem;">
+            <tbody>
+              <tr>
+                <td><strong>Processor</strong></td>
+                <td>Raspberry Pi 4 Model B (8GB RAM)</td>
+              </tr>
+              <tr>
+                <td><strong>CAN Interface</strong></td>
+                <td>PICAN-M HAT (MCP2515 chipset, SPI bus)</td>
+              </tr>
+              <tr>
+                <td><strong>Backbone Power</strong></td>
+                <td>Integrated 12V SMPS on PICAN-M HAT</td>
+              </tr>
+              <tr>
+                <td><strong>PoE/WAN Boost</strong></td>
+                <td>XTAR-Link EL6 V3 (12V to 56V boost)</td>
+              </tr>
+              <tr>
+                <td><strong>Vessel Switch</strong></td>
+                <td>Blue Sea 4153 WeatherDeck (maintained ON/OFF)</td>
+              </tr>
+              <tr>
+                <td><strong>Fuse rating</strong></td>
+                <td>5 Amp inline fuse on 12V supply wire</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- System state summary -->
+        <div class="card">
+          <h2>Telemetry Data Mapping</h2>
+          <table style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>Stat</th>
+                <th>Signal K Path</th>
+                <th>Unit</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>SOG</td>
+                <td><code>navigation.speedOverGround</code></td>
+                <td>m/s &rarr; kts</td>
+              </tr>
+              <tr>
+                <td>COG</td>
+                <td><code>navigation.courseOverGroundTrue</code></td>
+                <td>rad &rarr; deg</td>
+              </tr>
+              <tr>
+                <td>BSP</td>
+                <td><code>navigation.speedThroughWater</code></td>
+                <td>m/s &rarr; kts</td>
+              </tr>
+              <tr>
+                <td>TWA</td>
+                <td><code>environment.wind.angleTrueWater</code></td>
+                <td>rad &rarr; deg</td>
+              </tr>
+              <tr>
+                <td>TWS</td>
+                <td><code>environment.wind.speedTrue</code></td>
+                <td>m/s &rarr; kts</td>
+              </tr>
+              <tr>
+                <td>TWD</td>
+                <td><code>environment.wind.directionTrue</code></td>
+                <td>rad &rarr; deg</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="alert alert-warning">
+        <span class="alert-icon">💡</span>
+        <div>
+          <strong>Important Power Note:</strong> The XTAR-Link EL6 V3 draws 28W–42W when booting and operating the Starlink Gen 3 Dish. It is connected via the latching Blue Sea 4153 switch. Turn off when not updating weather charts to save battery house capacity during long offshore legs.
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: WIRING & POWER DIAGRAM -->
+    <div id="tab-wiring" class="tab-panel">
+      <div class="card">
+        <h2>Boat 12V Power & Wiring Layout</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+          Hover or click on components and wires in the wiring diagram below to view detailed specifications, wire gauges, and integration procedures.
+        </p>
+
+        <div class="diagram-panel">
+          <!-- SVG Diagram -->
+          <div class="diagram-view">
+            <svg viewBox="0 0 940 380" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+              <rect width="940" height="380" rx="10" fill="#080c14" stroke="rgba(255,255,255,0.05)" stroke-width="2"/>
+
+              <!-- Grid helper lines (subtle) -->
+              <line x1="280" y1="20" x2="280" y2="360" stroke="rgba(255,255,255,0.02)" stroke-width="1.5" stroke-dasharray="4,4"/>
+              <line x1="740" y1="20" x2="740" y2="360" stroke="rgba(255,255,255,0.02)" stroke-width="1.5" stroke-dasharray="4,4"/>
+              <text x="140" y="25" fill="#475569" font-size="10" font-weight="700" letter-spacing="0.05em">POWER DISTRIBUTION</text>
+              <text x="510" y="25" fill="#475569" font-size="10" font-weight="700" letter-spacing="0.05em">SMART BRIDGE CORE</text>
+              <text x="820" y="25" fill="#475569" font-size="10" font-weight="700" letter-spacing="0.05em">N2K BACKBONE</text>
+
+              <!-- nodes -->
+              <!-- 12V House Battery -->
+              <g class="svg-node" id="node-battery" onclick="showWiringInfo('battery')">
+                <rect x="20" y="60" width="100" height="70" rx="6" fill="#1c1917" stroke="#ef4444" stroke-width="1.5"/>
+                <text x="70" y="85" fill="#f97316" font-size="12" font-weight="700" text-anchor="middle">12V HOUSE</text>
+                <text x="70" y="100" fill="#f97316" font-size="12" font-weight="700" text-anchor="middle">BATTERY</text>
+                <text x="70" y="115" fill="#78716c" font-size="9" text-anchor="middle">House Bank</text>
+              </g>
+
+              <!-- Blue Sea 4153 Toggle Switch -->
+              <g class="svg-node" id="node-switch" onclick="showWiringInfo('switch')">
+                <rect x="160" y="60" width="90" height="70" rx="6" fill="#1e3a8a" stroke="#2563eb" stroke-width="1.5"/>
+                <text x="205" y="85" fill="#60a5fa" font-size="10" font-weight="700" text-anchor="middle">Blue Sea 4153</text>
+                <text x="205" y="100" fill="#60a5fa" font-size="10" font-weight="700" text-anchor="middle">ON/OFF Switch</text>
+                <text x="205" y="115" fill="#93c5fd" font-size="9" font-weight="700" text-anchor="middle">Latching</text>
+              </g>
+
+              <!-- Starlink Dish (Standard Gen 3) -->
+              <g class="svg-node" id="node-dish" onclick="showWiringInfo('dish')">
+                <rect x="20" y="180" width="100" height="70" rx="6" fill="#0f172a" stroke="#06b6d4" stroke-width="1.5"/>
+                <text x="70" y="210" fill="#38bdf8" font-size="10" font-weight="700" text-anchor="middle">STARLINK DISH</text>
+                <text x="70" y="225" fill="#94a3b8" font-size="8" text-anchor="middle">Gen 3 Standard</text>
+                <text x="70" y="238" fill="#94a3b8" font-size="8" text-anchor="middle">Flat Back</text>
+              </g>
+
+              <!-- XTAR-Link EL6 V3 Conversion Kit -->
+              <g class="svg-node" id="node-xtar" onclick="showWiringInfo('xtar')">
+                <rect x="150" y="180" width="110" height="150" rx="6" fill="#022c22" stroke="#10b981" stroke-width="1.5"/>
+                <text x="205" y="205" fill="#34d399" font-size="11" font-weight="700" text-anchor="middle">XTAR-LINK</text>
+                <text x="205" y="220" fill="#34d399" font-size="10" font-weight="700" text-anchor="middle">EL6 V3</text>
+                <text x="205" y="240" fill="#94a3b8" font-size="9" text-anchor="middle">12V-to-56V PoE</text>
+                <text x="205" y="255" fill="#94a3b8" font-size="9" text-anchor="middle">&amp; RJ45 LAN</text>
+                
+                <rect x="160" y="280" width="40" height="20" rx="3" fill="#065f46" stroke="#10b981"/>
+                <text x="180" y="293" fill="#e6f4ea" font-size="8" font-weight="700" text-anchor="middle">DISH</text>
+                
+                <rect x="210" y="280" width="40" height="20" rx="3" fill="#065f46" stroke="#10b981"/>
+                <text x="230" y="293" fill="#e6f4ea" font-size="8" font-weight="700" text-anchor="middle">LAN</text>
+              </g>
+
+              <!-- Raspberry Pi 4 (8GB) -->
+              <g class="svg-node" id="node-pi" onclick="showWiringInfo('pi')">
+                <rect x="330" y="60" width="170" height="270" rx="8" fill="#0f172a" stroke="#2563eb" stroke-width="2"/>
+                <text x="415" y="85" fill="#60a5fa" font-size="13" font-weight="800" text-anchor="middle">Raspberry Pi 4</text>
+                <text x="415" y="100" fill="#94a3b8" font-size="9" text-anchor="middle">8GB RAM (rambler.local)</text>
+                
+                <rect x="345" y="275" width="60" height="24" rx="4" fill="#1e293b" stroke="#334155"/>
+                <text x="375" y="290" fill="#e2e8f0" font-size="9" font-weight="700" text-anchor="middle">ETH0</text>
+                
+                <text x="415" y="130" fill="#e2e8f0" font-size="10" font-weight="600" text-anchor="middle">Signal K Server</text>
+                <text x="415" y="145" fill="#64748b" font-size="8" text-anchor="middle">Port 3000</text>
+                <text x="415" y="175" fill="#e2e8f0" font-size="10" font-weight="600" text-anchor="middle">Rambler_Net AP</text>
+                <text x="415" y="190" fill="#64748b" font-size="8" text-anchor="middle">hostapd · 192.168.5.1</text>
+              </g>
+
+              <!-- PICAN-M HAT (Mounted on top of Pi) -->
+              <g class="svg-node" id="node-pican" onclick="showWiringInfo('pican')">
+                <rect x="530" y="60" width="180" height="270" rx="8" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+                <text x="620" y="85" fill="#34d399" font-size="13" font-weight="800" text-anchor="middle">PICAN-M HAT</text>
+                <text x="620" y="100" fill="#94a3b8" font-size="9" text-anchor="middle">SocketCAN HAT</text>
+                
+                <rect x="545" y="120" width="150" height="50" rx="4" fill="#065f46" stroke="#10b981"/>
+                <text x="620" y="137" fill="#86efac" font-size="10" font-weight="700" text-anchor="middle">CAN0 Driver</text>
+                <text x="620" y="152" fill="#e6f4ea" font-size="9" text-anchor="middle">systemd-networkd</text>
+                
+                <rect x="545" y="185" width="150" height="50" rx="4" fill="#065f46" stroke="#10b981"/>
+                <text x="620" y="202" fill="#86efac" font-size="10" font-weight="700" text-anchor="middle">12V Power SMPS</text>
+                <text x="620" y="217" fill="#fbbf24" font-size="9" text-anchor="middle">Powers Pi via GPIO</text>
+
+                <rect x="545" y="250" width="150" height="40" rx="4" fill="#065f46" stroke="#10b981"/>
+                <text x="620" y="274" fill="#e2e8f0" font-size="10" font-weight="700" text-anchor="middle">N2K Terminal Port</text>
+              </g>
+
+              <!-- B&G N2K Backbone -->
+              <g class="svg-node" id="node-bg" onclick="showWiringInfo('bg')">
+                <rect x="770" y="150" width="150" height="90" rx="6" fill="#1c1917" stroke="#f59e0b" stroke-width="1.5"/>
+                <text x="845" y="175" fill="#f59e0b" font-size="11" font-weight="800" text-anchor="middle">B&amp;G N2K Backbone</text>
+                <text x="845" y="195" fill="#d97706" font-size="9" text-anchor="middle">NSPL-500 Hub</text>
+                <text x="845" y="212" fill="#a8a29e" font-size="8" text-anchor="middle">Zeus3S / NAIS-500</text>
+                <text x="845" y="225" fill="#a8a29e" font-size="8" text-anchor="middle">Garmin GNT10</text>
+              </g>
+
+              <!-- CABLES / PATHWAYS -->
+              <!-- 1. Battery to switch (Power) -->
+              <g class="svg-cable" id="cable-power1" onclick="showWiringInfo('power1')">
+                <line x1="120" y1="95" x2="160" y2="95" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+                <polygon points="154,91 160,95 154,99" fill="#ef4444"/>
+              </g>
+
+              <!-- 2. Switch to PICAN-M Power Terminal (Power) -->
+              <g class="svg-cable" id="cable-power2" onclick="showWiringInfo('power2')">
+                <path d="M 250,95 L 305,95 L 305,290 L 545,290" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+                <polygon points="539,286 545,290 539,294" fill="#ef4444"/>
+              </g>
+
+              <!-- 3. Ground wiring (GND) -->
+              <g class="svg-cable" id="cable-gnd" onclick="showWiringInfo('gnd')">
+                <path d="M 120,115 L 140,115 L 140,320 L 590,320 L 590,290" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="3,3"/>
+              </g>
+
+              <!-- 4. Starlink to XTAR-Link Dish Port (PoE) -->
+              <g class="svg-cable" id="cable-poe" onclick="showWiringInfo('poe-cable')">
+                <line x1="120" y1="215" x2="150" y2="215" stroke="#06b6d4" stroke-width="3" stroke-linecap="round"/>
+                <polygon points="144,211 150,215 144,219" fill="#06b6d4"/>
+              </g>
+
+              <!-- 5. XTAR-Link LAN to Pi ETH0 (Data) -->
+              <g class="svg-cable" id="cable-data" onclick="showWiringInfo('data-cable')">
+                <path d="M 230,295 L 230,350 L 375,350 L 375,302" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round"/>
+                <polygon points="371,308 375,302 379,308" fill="#2563eb"/>
+              </g>
+
+              <!-- 6. PICAN-M N2K Drop (NMEA) -->
+              <g class="svg-cable" id="cable-nmea" onclick="showWiringInfo('nmea-cable')">
+                <line x1="695" y1="270" x2="770" y2="270" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+                <polygon points="764,266 770,270 764,274" fill="#f59e0b"/>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Info Box Sidebar -->
+          <div class="diagram-info">
+            <div class="info-box" id="wiring-info-panel">
+              <h3>Wiring Component Details</h3>
+              <p id="wiring-desc">Click on any component or line in the wiring diagram to inspect hardware specifications, terminal configurations, voltage requirements, and standard operating procedures.</p>
+              <div class="info-meta" id="wiring-meta" style="display: none;">
+                <div class="info-meta-item">
+                  <span>Pin/Terminal:</span>
+                  <span id="wiring-pin" class="text-val">-</span>
+                </div>
+                <div class="info-meta-item">
+                  <span>Voltage/Rating:</span>
+                  <span id="wiring-volt" class="text-val">-</span>
+                </div>
+                <div class="info-meta-item">
+                  <span>Protocol:</span>
+                  <span id="wiring-prot" class="text-val">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-danger">
+        <span class="alert-icon">⚠️</span>
+        <div>
+          <strong>Switch Specification Warning:</strong> Check your inventory. The Blue Sea **4151** switch is a *momentary* contact switch and cannot be used for maintained loads like the Pi or Starlink. Verify that you have ordered and are using the Blue Sea **4153** switch, which is a latching ON-OFF switch.
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: NETWORK & DATA ARCHITECTURE -->
+    <div id="tab-network" class="tab-panel">
+      <div class="card">
+        <h2>Network & Data Routing Blueprint</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+          This blueprint shows how data flows through the Smart Bridge core. Click nodes and interfaces to check routing rules, subnets, and protocols.
+        </p>
+
+        <div class="diagram-panel">
+          <!-- SVG Diagram -->
+          <div class="diagram-view">
+            <svg viewBox="0 0 860 280" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+              <rect width="860" height="280" rx="10" fill="#080c14" stroke="rgba(255,255,255,0.05)" stroke-width="2"/>
+
+              <!-- Nodes -->
+              <!-- Starlink -->
+              <g class="svg-node" id="net-node-starlink" onclick="showNetworkInfo('starlink')">
+                <rect x="10" y="20" width="140" height="60" rx="8" fill="#1e3a5f" stroke="#2563eb" stroke-width="1.5"/>
+                <text x="80" y="44" fill="#60a5fa" font-size="11" font-weight="700" text-anchor="middle">STARLINK WAN</text>
+                <text x="80" y="60" fill="#94a3b8" font-size="9" text-anchor="middle">via XTAR-Link EL6 V3</text>
+                <text x="80" y="72" fill="#38bdf8" font-size="9" text-anchor="middle">DHCP: 192.168.100.1</text>
+              </g>
+
+              <!-- Pi 4 Router -->
+              <g class="svg-node" id="net-node-pi-net" onclick="showNetworkInfo('pi-net')">
+                <rect x="320" y="10" width="220" height="260" rx="10" fill="#0f172a" stroke="#2563eb" stroke-width="2"/>
+                <text x="430" y="32" fill="#38bdf8" font-size="12" font-weight="800" text-anchor="middle">Raspberry Pi 4 (8GB)</text>
+                <text x="430" y="46" fill="#94a3b8" font-size="9" text-anchor="middle">rambler.local (NAT Bridge)</text>
+                
+                <rect x="335" y="60" width="190" height="38" rx="6" fill="#1e3a5f" stroke="rgba(255,255,255,0.05)"/>
+                <text x="430" y="76" fill="#e2e8f0" font-size="10" font-weight="600" text-anchor="middle">nginx :80 (Web Server)</text>
+                <text x="430" y="89" fill="#94a3b8" font-size="9" text-anchor="middle">Dashboard app (Local Cache)</text>
+
+                <rect x="335" y="108" width="190" height="38" rx="6" fill="#14532d" stroke="rgba(255,255,255,0.05)"/>
+                <text x="430" y="124" fill="#86efac" font-size="10" font-weight="600" text-anchor="middle">Signal K :3000 (Data Engine)</text>
+                <text x="430" y="137" fill="#94a3b8" font-size="9" text-anchor="middle">N2K raw-to-JSON parser</text>
+
+                <rect x="335" y="156" width="190" height="38" rx="6" fill="#1e293b" stroke="rgba(255,255,255,0.05)"/>
+                <text x="430" y="172" fill="#e2e8f0" font-size="10" font-weight="600" text-anchor="middle">hostapd + dnsmasq AP</text>
+                <text x="430" y="185" fill="#94a3b8" font-size="9" text-anchor="middle">Rambler_Net · 192.168.5.1</text>
+
+                <rect x="335" y="204" width="190" height="38" rx="6" fill="#1e293b" stroke="rgba(255,255,255,0.05)"/>
+                <text x="430" y="220" fill="#e2e8f0" font-size="10" font-weight="600" text-anchor="middle">SocketCAN Driver</text>
+                <text x="430" y="233" fill="#94a3b8" font-size="9" text-anchor="middle">can0 @ 250kbps bitrate</text>
+              </g>
+
+              <!-- iPad Pro Helm Display -->
+              <g class="svg-node" id="net-node-ipad" onclick="showNetworkInfo('ipad')">
+                <rect x="10" y="190" width="140" height="60" rx="8" fill="#1c1917" stroke="#2563eb" stroke-width="1.5"/>
+                <text x="80" y="214" fill="#60a5fa" font-size="11" font-weight="700" text-anchor="middle">📱 iPad Helm</text>
+                <text x="80" y="230" fill="#94a3b8" font-size="9" text-anchor="middle">DHCP: 192.168.5.x</text>
+                <text x="80" y="242" fill="#38bdf8" font-size="8" text-anchor="middle">http://192.168.5.1</text>
+              </g>
+
+              <!-- B&G Instruments -->
+              <g class="svg-node" id="net-node-bg-instruments" onclick="showNetworkInfo('bg-instruments')">
+                <rect x="700" y="185" width="150" height="74" rx="8" fill="#1c1003" stroke="#f59e0b" stroke-width="1.5"/>
+                <text x="775" y="206" fill="#fbbf24" font-size="11" font-weight="700" text-anchor="middle">B&amp;G N2K BUS</text>
+                <text x="775" y="221" fill="#94a3b8" font-size="9" text-anchor="middle">Zeus3S, NAIS-500,</text>
+                <text x="775" y="234" fill="#94a3b8" font-size="9" text-anchor="middle">GNT10 GPS Antenna</text>
+                <text x="775" y="247" fill="#fbbf24" font-size="8" text-anchor="middle">M12 drop connection</text>
+              </g>
+
+              <!-- WiFi AP Bubble visual -->
+              <g class="svg-node" id="net-node-ap-bubble" onclick="showNetworkInfo('ap-bubble')">
+                <ellipse cx="190" cy="120" rx="60" ry="40" fill="rgba(37, 99, 235, 0.05)" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="4,4"/>
+                <text x="190" y="112" fill="#60a5fa" font-size="10" font-weight="700" text-anchor="middle">WiFi AP</text>
+                <text x="190" y="125" fill="#e2e8f0" font-size="10" font-weight="700" text-anchor="middle">Rambler_Net</text>
+                <text x="190" y="138" fill="#94a3b8" font-size="8" text-anchor="middle">Channel 7</text>
+              </g>
+
+              <!-- Connection Lines -->
+              <!-- 1. Starlink to Pi eth0 -->
+              <g class="svg-cable" id="net-cable-link-starlink" onclick="showNetworkInfo('link-starlink')">
+                <line x1="150" y1="50" x2="320" y2="50" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="4,2"/>
+                <polygon points="314,46 320,50 314,54" fill="#2563eb"/>
+              </g>
+
+              <!-- 2. B&G to PICAN (N2K) -->
+              <g class="svg-cable" id="net-cable-link-nmea" onclick="showNetworkInfo('link-nmea')">
+                <line x1="540" y1="222" x2="700" y2="222" stroke="#f59e0b" stroke-width="3"/>
+                <polygon points="546,218 540,222 546,226" fill="#f59e0b"/>
+              </g>
+
+              <!-- 3. Pi AP to AP bubble -->
+              <g class="svg-cable" id="net-cable-link-wlan0" onclick="showNetworkInfo('link-wlan0')">
+                <line x1="320" y1="175" x2="250" y2="175" stroke="#2563eb" stroke-width="2"/>
+                <polygon points="256,171 250,175 256,179" fill="#2563eb"/>
+              </g>
+
+              <!-- 4. iPad to AP bubble -->
+              <g class="svg-cable" id="net-cable-link-wifi" onclick="showNetworkInfo('link-wifi')">
+                <line x1="130" y1="190" x2="165" y2="155" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-dasharray="3,3"/>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Info Box Sidebar -->
+          <div class="diagram-info">
+            <div class="info-box" id="network-info-panel">
+              <h3>Network Routing Details</h3>
+              <p id="network-desc">Click on any node, wire, or boundary interface to view network routing tables, NAT configurations, mDNS endpoints, and systemd service links.</p>
+              <div class="info-meta" id="network-meta" style="display: none;">
+                <div class="info-meta-item">
+                  <span>Interface:</span>
+                  <span id="network-int" class="text-val">-</span>
+                </div>
+                <div class="info-meta-item">
+                  <span>Subnet / IP:</span>
+                  <span id="network-sub" class="text-val">-</span>
+                </div>
+                <div class="info-meta-item">
+                  <span>Service Daemon:</span>
+                  <span id="network-serv" class="text-val">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Apps Integration Info Card -->
+      <div class="card" style="margin-top: 1.5rem;">
+        <h2>Navigation Apps Integration Reference</h2>
+        <div class="grid-2">
+          <div>
+            <h3 style="font-size: 1.05rem; font-weight: 700; color: #ffffff; margin-bottom: 0.5rem;">📱 B&amp;G Zeus3S Plotter &amp; Link App</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              Connect the Zeus3S plotter directly to the Pi's Wi-Fi network:
+            </p>
+            <ol style="margin-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              <li>On the Zeus3S: <strong>Settings &rarr; Wireless &rarr; Connect to a wireless hotspot</strong>.</li>
+              <li>Select <strong>Rambler_Net</strong> and enter the password <code>RAMBLER2026</code>.</li>
+              <li>Connect your iPad to <strong>Rambler_Net</strong> and open the <strong>B&amp;G Link</strong> app to mirror/control the plotter.</li>
+            </ol>
+          </div>
+          <div>
+            <h3 style="font-size: 1.05rem; font-weight: 700; color: #ffffff; margin-bottom: 0.5rem;">⛵ Expedition &amp; WilhelmSK</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              Stream raw telemetry or Signal K JSON data to your nav apps:
+            </p>
+            <ul style="margin-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+              <li style="margin-bottom: 0.5rem;"><strong>Expedition:</strong> Add connection type <code>Network (TCP Client)</code> to IP <code>192.168.5.1</code>, Port <code>10110</code>.</li>
+              <li style="margin-bottom: 0.5rem;"><strong>WilhelmSK / KIP:</strong> Configure connection endpoint server to <code>192.168.5.1:3000</code> over WebSockets.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weather Routing & Ingestion Card -->
+      <div class="card" style="margin-top: 1.5rem;">
+        <h2>Weather Ingestion & Routing Reference</h2>
+        <div class="grid-2">
+          <div>
+            <h3 style="font-size: 1.05rem; font-weight: 700; color: #ffffff; margin-bottom: 0.5rem;">⛈ NOAA HRRR GRIB Grid Ingestion</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              The Pi downloads high-resolution (3-km) wind forecast grids automatically when internet is available:
+            </p>
+            <ol style="margin-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              <li style="margin-bottom: 0.25rem;">Starlink WAN connection is detected via the PoE gateway interface.</li>
+              <li style="margin-bottom: 0.25rem;">A script on the Pi runs <code>download_hrrr.py</code> to download a filtered GRIB2 from NOAA NOMADS.</li>
+              <li style="margin-bottom: 0.25rem;">It isolates U/V wind vectors at 10m height for the Great Lakes area (under 150KB size).</li>
+              <li style="margin-bottom: 0.25rem;">It decodes the grid into <code>/home/guarox/gribs/hrrr_latest.json</code> for 100% offline access at the helm.</li>
+            </ol>
+          </div>
+          <div>
+            <h3 style="font-size: 1.05rem; font-weight: 700; color: #ffffff; margin-bottom: 0.5rem;">🗺 PredictWind Routing Bridge</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              Calculate weather routing tracks using J/99 polars and cloud forecast engines:
+            </p>
+            <ul style="margin-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+              <li style="margin-bottom: 0.5rem;"><strong>Setup:</strong> Tap the header <code>⬡ PW</code> button, configure your account credentials and select target models.</li>
+              <li style="margin-bottom: 0.5rem;"><strong>Trigger Calculation:</strong> Select a target waypoint on the map, then click <em>Calculate Route</em> to calculate optimal paths.</li>
+              <li style="margin-bottom: 0.5rem;"><strong>Visualizations:</strong> Dynamic overlay traces color-coded routing lines for all models (PWG, PWE, ECMWF, GFS, SPIRE, UKMO) and schedules tack/gybe coordinates on the helm.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: INTERACTIVE CHECKLISTS -->
+    <div id="tab-checklists" class="tab-panel">
+      <div class="grid-2">
+        
+        <!-- Checklist Panel -->
+        <div class="card">
+          <h2>Boat Installation Checklist</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+            Check off steps on your tablet as you proceed. Progress is saved automatically to your device storage.
+          </p>
+
+          <!-- Section 1 -->
+          <div class="checklist-group">
+            <h3><span>🔧</span> Stage 1: Hardware Pre-assembly</h3>
+            <ul class="checklist-list">
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-pican-mount')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Mount PICAN-M HAT securely to the Pi 4 using standard brass spacers.</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-case')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Assemble passive Armor cooling case, aligning heat pads on Pi 4 CPU and RAM.</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-sd-card')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Insert flashed 128GB SanDisk MAX Endurance MicroSD card into the Pi 4.</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-cable-check')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Prepare two short-run CAT6 Ethernet cables (Pi to XTAR-Link).</div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Section 2 -->
+          <div class="checklist-group">
+            <h3><span>⛵</span> Stage 2: Boat Integration (First Run)</h3>
+            <ul class="checklist-list">
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-switch-wiring')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Connect 12V House Battery positive line to Blue Sea 4153 Switch + 5A fuse.</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-pican-wire')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Run wire from switch outputs to PICAN-M HAT screw terminals (V+ & GND).</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-n2k-drop')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Connect micro-C NMEA 2000 drop cable from PICAN-M to NSPL-500 Hub.</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-power-on')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Power ON the system. Verify red PWR indicator on enclosure lights up.</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-wifi-connect')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Connect iPad to <strong>Rambler_Net</strong> (password: <code>RAMBLER2026</code>).</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-sk-admin')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Open <code>http://rambler.local:3000</code> and create admin account.</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-sk-add-can')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Go to Server -> Data Connections -> Add -> NMEA 2000 / can0. Save & Restart.</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-vessel-config')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Set vessel identity: Name: <code>Rambler</code>, MMSI: <code>338380946</code>.</div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Section 3 -->
+          <div class="checklist-group">
+            <h3><span>🏁</span> Stage 3: Race Day Checklist</h3>
+            <ul class="checklist-list">
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-boot')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Turn on Pi (Blue Sea 4153 switch ON). Wait 45 seconds for full initialization.</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-ipad-connect')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Verify iPad Helm Display is connected to SSID: <strong>Rambler_Net</strong>.</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-dash-load')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Open browser to <code>http://192.168.5.1</code>. Verify dashboard loads.</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-sk-stream')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Connect Signal K: Click indicator badge &rarr; enter <code>192.168.5.1:3000</code> &rarr; Connect.</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-live-val')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Power on B&G array. Check that telemetry badge goes <span style="color:#10b981;font-weight:700">● LIVE</span>.</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-marks')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Set start marks: Drop committee boat (Start P) and pin end (Start S).</div>
+              </li>
+              <li class="checklist-item" onclick="toggleCheck(this, 'chk-race-start')">
+                <div class="checklist-checkbox"></div>
+                <div class="checklist-label">Tap <strong>▶ Start Race</strong> to begin recording logs to local storage.</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- System state guide -->
+        <div class="card">
+          <h2>Dashboard Indicator States</h2>
+          <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+            <div style="border-left: 4px solid #64748b; padding-left: 1rem;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; background: #334155; padding: 0.2rem 0.6rem; border-radius: 4px;">○ NO DATA</span>
+              <h4 style="margin-top: 0.5rem; font-size: 0.95rem;">No NMEA Instruments Flowing</h4>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Pi AP connection is active and WebSocket is connected, but the PICAN-M is receiving no raw bytes from N2K. Verify the B&G instrument switch is ON.
+              </p>
+            </div>
+            
+            <div style="border-left: 4px solid #f59e0b; padding-left: 1rem;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; background: rgba(245, 158, 11, 0.15); color: #fde68a; padding: 0.2rem 0.6rem; border-radius: 4px;">◌ SK…</span>
+              <h4 style="margin-top: 0.5rem; font-size: 0.95rem;">Signal K Reconnecting</h4>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+                The dashboard app is attempting to build a socket handshake to <code>192.168.5.1:3000</code>. This is normal during the first 30 seconds of system boot.
+              </p>
+            </div>
+
+            <div style="border-left: 4px solid #10b981; padding-left: 1rem;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; background: rgba(16, 185, 129, 0.15); color: #a7f3d0; padding: 0.2rem 0.6rem; border-radius: 4px;">● LIVE</span>
+              <h4 style="margin-top: 0.5rem; font-size: 0.95rem;">System Operational</h4>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Instruments are streaming from the backbone through PICAN-M and Signal K directly into the web dashboard. Updates are streaming at 1Hz over WebSockets.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: DIAGNOSTIC TERMINAL -->
+    <div id="tab-terminal" class="tab-panel">
+      <div class="card">
+        <h2>Smart Bridge Live Diagnostic Console</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+          Select a terminal command button below to simulate running commands on the Raspberry Pi. This lets you see what a healthy system configuration outputs when running.
+        </p>
+
+        <!-- Command Selectors -->
+        <div class="terminal-selector">
+          <button class="term-btn active" onclick="runCommand('iplink')">ip link show can0</button>
+          <button class="term-btn" onclick="runCommand('candump')">candump can0</button>
+          <button class="term-btn" onclick="runCommand('status-network')">systemctl status systemd-networkd</button>
+          <button class="term-btn" onclick="runCommand('status-sk')">systemctl status signalk</button>
+          <button class="term-btn" onclick="runCommand('wlan-ap')">ip addr show wlan0</button>
+        </div>
+
+        <!-- Terminal Output -->
+        <div class="terminal-container">
+          <div class="terminal-header">
+            <div class="terminal-dots">
+              <div class="terminal-dot dot-red"></div>
+              <div class="terminal-dot dot-yellow"></div>
+              <div class="terminal-dot dot-green"></div>
+            </div>
+            <div class="terminal-title">guarox@rambler: ~ (ssh)</div>
+            <div style="width: 30px"></div>
+          </div>
+          <div class="terminal-body" id="term-out">guarox@rambler:~$ ip link show can0
+can0: &lt;NOARP,UP,LOWER_UP,ECHO&gt; mtu 16 qdisc pfifo_fast state UP mode DEFAULT group default qlen 10
+    link/can 
+guarox@rambler:~$ <span class="cursor"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: TROUBLESHOOTING & N2K MAPPING -->
+    <div id="tab-trouble" class="tab-panel">
+      <!-- Search Matrix -->
+      <div class="card">
+        <h2>Troubleshooting Matrix</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+          Type in the box below to filter issues by symptoms (e.g. "wifi", "candump", "down", "cert").
+        </p>
+        
+        <div class="search-container">
+          <input type="text" class="search-input" id="trouble-search" placeholder="Type a keyword to filter rows..." onkeyup="filterTroubleshooting()">
+        </div>
+
+        <table id="trouble-table">
+          <thead>
+            <tr>
+              <th style="width: 25%">Symptom / Error</th>
+              <th style="width: 35%">Root Cause Analysis</th>
+              <th style="width: 40%">Resolution Commands & Procedures</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="trouble-row">
+              <td><strong><code>ip link</code> does not show <code>can0</code></strong></td>
+              <td>Device tree overlay has not been loaded in the boot partition configuration.</td>
+              <td>Verify <code>/boot/firmware/config.txt</code> contains:<br><code>dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=25</code></td>
+            </tr>
+            <tr class="trouble-row">
+              <td><strong><code>can0</code> exists but is <code>state DOWN</code></strong></td>
+              <td>The systemd network unit is missing, or the service has not run.</td>
+              <td>Verify configuration exists at:<br><code>/etc/systemd/network/80-can.network</code><br>Then run:<br><code>sudo systemctl restart systemd-networkd</code></td>
+            </tr>
+            <tr class="trouble-row">
+              <td><strong><code>candump can0</code> outputs <code>Network is down</code></strong></td>
+              <td>CAN drivers are loaded in the kernel but the link state was not brought up.</td>
+              <td>Manually trigger link interface initialization:<br><code>sudo ip link set can0 up type can bitrate 250000</code></td>
+            </tr>
+            <tr class="trouble-row">
+              <td><strong><code>candump</code> is empty (instruments are ON)</strong></td>
+              <td>No 12V bus power detected on the NMEA 2000 backbone, or wiring polarity is reversed.</td>
+              <td>Verify termination: measure exactly ~60&Omega; across NET+ & NET- with power OFF.<br>Measure voltage between Red (+) and Black (-) wires. Must be 11.8V to 13.8V.</td>
+            </tr>
+            <tr class="trouble-row">
+              <td><strong>iPad cannot locate <code>Rambler_Net</code> AP SSID</strong></td>
+              <td>WiFi chip interface is soft-blocked by rfkill, or hostapd daemon crashed.</td>
+              <td>SSH in (wired) or console to unblock interface:<br><code>sudo rfkill unblock wifi</code><br><code>sudo systemctl restart hostapd</code></td>
+            </tr>
+            <tr class="trouble-row">
+              <td><strong>Signal K connects, but helm dashboard shows <code>—</code></strong></td>
+              <td>N2K data connections are not configured in the Signal K Admin panel.</td>
+              <td>Log in to <code>http://192.168.5.1:3000</code>. Go to <strong>Server &rarr; Data Connections</strong>. Add <code>can0</code> as <strong>Canbus (canboatjs)</strong>.</td>
+            </tr>
+            <tr class="trouble-row">
+              <td><strong>Dashboard displays <code>◌ SK…</code> and refuses to connect</strong></td>
+              <td>Signal K daemon is offline or port 3000 is blocked.</td>
+              <td>Restart the service container daemon:<br><code>sudo systemctl restart signalk</code></td>
+            </tr>
+            <tr class="trouble-row">
+              <td><strong>Tablet gets no IP when connecting to AP</strong></td>
+              <td>The DHCP server daemon (dnsmasq) is offline or misconfigured.</td>
+              <td>Check log outputs and restart DHCP allocator daemon:<br><code>sudo systemctl restart dnsmasq</code></td>
+            </tr>
+            <tr class="trouble-row">
+              <td><strong>HTTPS certificate error when loading dashboard</strong></td>
+              <td>Attempting to load the dashboard via HTTPS local page without SSL certificate keys.</td>
+              <td>Always load local dashboard using plain HTTP:<br><span class="text-val">http://192.168.5.1</span> (not https)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- JavaScript logic -->
+  <script>
+    // Tab switching
+    function switchTab(evt, tabId) {
+      const panels = document.querySelectorAll('.tab-panel');
+      const buttons = document.querySelectorAll('.tab-btn');
+      
+      panels.forEach(panel => panel.classList.remove('active'));
+      buttons.forEach(btn => btn.classList.remove('active'));
+      
+      document.getElementById(tabId).classList.add('active');
+      evt.currentTarget.classList.add('active');
+    }
+
+    // Toggle Night Mode (Deep Red/Black)
+    function toggleNightMode() {
+      const currentTheme = document.body.getAttribute('data-theme');
+      const badge = document.getElementById('status-badge');
+      
+      if (currentTheme === 'night') {
+        document.body.removeAttribute('data-theme');
+        document.getElementById('night-text').textContent = 'Night Mode (Red)';
+        document.getElementById('night-icon').textContent = '👁️‍🗨️';
+        badge.style.boxShadow = '0 0 15px var(--success-glow)';
+      } else {
+        document.body.setAttribute('data-theme', 'night');
+        document.getElementById('night-text').textContent = 'Day Mode (Dark)';
+        document.getElementById('night-icon').textContent = '☀️';
+        badge.style.boxShadow = 'none';
+      }
+    }
+
+    // Interactive Checklists with localStorage
+    function toggleCheck(element, key) {
+      element.classList.toggle('checked');
+      const isChecked = element.classList.contains('checked');
+      localStorage.setItem(key, isChecked ? 'true' : 'false');
+    }
+
+    // Load checklist states on start
+    document.addEventListener('DOMContentLoaded', () => {
+      const items = [
+        { el: 'chk-pican-mount', key: 'chk-pican-mount' },
+        { el: 'chk-case', key: 'chk-case' },
+        { el: 'chk-sd-card', key: 'chk-sd-card' },
+        { el: 'chk-cable-check', key: 'chk-cable-check' },
+        { el: 'chk-switch-wiring', key: 'chk-switch-wiring' },
+        { el: 'chk-pican-wire', key: 'chk-pican-wire' },
+        { el: 'chk-n2k-drop', key: 'chk-n2k-drop' },
+        { el: 'chk-power-on', key: 'chk-power-on' },
+        { el: 'chk-wifi-connect', key: 'chk-wifi-connect' },
+        { el: 'chk-sk-admin', key: 'chk-sk-admin' },
+        { el: 'chk-sk-add-can', key: 'chk-sk-add-can' },
+        { el: 'chk-vessel-config', key: 'chk-vessel-config' },
+        { el: 'chk-boot', key: 'chk-boot' },
+        { el: 'chk-ipad-connect', key: 'chk-ipad-connect' },
+        { el: 'chk-dash-load', key: 'chk-dash-load' },
+        { el: 'chk-sk-stream', key: 'chk-sk-stream' },
+        { el: 'chk-live-val', key: 'chk-live-val' },
+        { el: 'chk-marks', key: 'chk-marks' },
+        { el: 'chk-race-start', key: 'chk-race-start' }
+      ];
+
+      // Find checklist list items
+      const domItems = document.querySelectorAll('.checklist-item');
+      items.forEach((item, index) => {
+        const val = localStorage.getItem(item.key);
+        if (val === 'true') {
+          domItems[index].classList.add('checked');
+        }
+      });
+    });
+
+    // Troubleshooting filter
+    function filterTroubleshooting() {
+      const query = document.getElementById('trouble-search').value.toLowerCase();
+      const rows = document.querySelectorAll('.trouble-row');
+      
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(query)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    // Wiring Diagram Data Info
+    const wiringData = {
+      'battery': {
+        title: '12V House Battery Bank',
+        desc: 'Vessel primary power reserve. Standard lead-acid/AGM or LiFePO4 cells providing boat instrumentation grid capacity.',
+        pin: 'Positive (+) & Negative (-) Busbars',
+        volt: '12.4V - 14.2V DC standard range',
+        prot: 'DC Analog Grid'
+      },
+      'switch': {
+        title: 'Blue Sea 4153 Switch',
+        desc: 'Latching SPST toggle switch on the nav panel. Maintained contact ON-OFF. Controls downstream supply lines for Pi and Starlink systems.',
+        pin: 'Single Pole, Single Throw Terminals',
+        volt: 'Rated to 20A @ 12V DC',
+        prot: 'Manual SPST Circuit'
+      },
+      'dish': {
+        title: 'Starlink Gen 3 Dish',
+        desc: 'Standard Flat-Back phased array satellite terminal. Reconfigured for native 12V operation to bypass high AC inverter power draw.',
+        pin: 'Single custom RJ45 PoE connector',
+        volt: '56V DC nominal (injected via PoE)',
+        prot: 'Standard TCP/IP over Ethernet'
+      },
+      'xtar': {
+        title: 'XTAR-Link EL6 V3 Kit',
+        desc: 'All-in-one Step-Up PoE injection module. Takes raw 12V input, boosts it to 56V to power the Starlink dish, and exposes a raw LAN ethernet port for local client bridges.',
+        pin: '12V input screw / RJ45 DISH / RJ45 LAN',
+        volt: '12V Input &rarr; 56V PoE Output (3A max)',
+        prot: 'Passive PoE + Gigabit Ethernet'
+      },
+      'pi': {
+        title: 'Raspberry Pi 4 Model B',
+        desc: 'Core Smart Bridge gateway processor. Runs OpenPlotter, hostapd (WiFi Access Point), nginx (Local Dashboard server), and dnsmasq (DHCP).',
+        pin: 'USB-C (unpopulated) / 40-Pin GPIO / RJ45 eth0',
+        volt: '5V DC nominal (powered via HAT GPIO)',
+        prot: 'ARM64 Linux Platform'
+      },
+      'pican': {
+        title: 'PICAN-M SMPS HAT',
+        desc: 'NMEA 2000 SocketCAN adapter. Exposes a 12V Switch Mode Power Supply (SMPS) which down-converts backbone power to output 5V/3A directly onto the Pi GPIO header, eliminating external USB adapters.',
+        pin: 'CAN-Bus Micro Terminals / 40-Pin GPIO Stack',
+        volt: '7V-28V Input &rarr; 5V/3A Output to Pi',
+        prot: 'SPI Bus Protocol (MCP2515 chipset)'
+      },
+      'bg': {
+        title: 'B&G NMEA 2000 Backbone',
+        desc: 'Physical CAN trunk running throughout the vessel. Connects primary Zeus3S plotter, NAIS-500 AIS, and Garmin GNT10 antenna.',
+        pin: 'M12 5-pin micro-C connectors',
+        volt: '12V DC Backbone supply (LEN isolated)',
+        prot: 'NMEA 2000 / SocketCAN (250kbps)'
+      },
+      'power1': {
+        title: 'Battery-to-Switch Line',
+        desc: 'Primary 12V positive supply line from the house battery busbar. Must include a 5 Amp inline fuse close to the battery terminal.',
+        pin: '14AWG marine-grade tinned wire',
+        volt: '12V DC (+) line',
+        prot: 'DC Primary Supply'
+      },
+      'power2': {
+        title: 'Switched 12V Supply Line',
+        desc: 'Carries switched positive power to the PICAN-M HAT screw terminal block. Powers the entire telemetry bridge system.',
+        pin: '16AWG marine-grade tinned wire',
+        volt: '12V DC Switched (+)',
+        prot: 'DC Telemetry Supply'
+      },
+      'gnd': {
+        title: 'Common Negative Ground Line',
+        desc: 'Ground return line linking the Pi, PICAN-M power blocks, and XTAR-Link systems directly to the vessel negative ground busbar.',
+        pin: '14/16AWG marine-grade tinned wire (Black)',
+        volt: '0V DC Common Ground (-)',
+        prot: 'DC Negative Return'
+      },
+      'poe-cable': {
+        title: 'Starlink PoE Cable',
+        desc: 'Double-shielded marine-grade cable carrying both 56V operating power and high-speed satellite network data links to the dish.',
+        pin: 'Cat5e/Cat6 Shielded RJ45 connectors',
+        volt: '56V DC PoE + Data lines',
+        prot: 'Gigabit Ethernet PoE'
+      },
+      'data-cable': {
+        title: 'LAN Bridge Ethernet Cable',
+        desc: 'Patch cable bridging the XTAR-Link LAN output directly to the Raspberry Pi RJ45 port. Provides WAN internet routing into the AP.',
+        pin: 'Shielded RJ45 patch cable (0.5m)',
+        volt: 'Standard Ethernet signal level',
+        prot: 'TCP/IP Gigabit WAN Bridge'
+      },
+      'nmea-cable': {
+        title: 'NMEA 2000 Drop Cable',
+        desc: 'Connects the N2K terminal port on the PICAN-M HAT directly to a spur port on the B&G NSPL-500 backbone splitter block.',
+        pin: 'Ancor N2K Drop Cable spur connector',
+        volt: 'CAN Differential Signals (CANH / CANL)',
+        prot: 'CAN 2.0B / SAE J1939 core'
+      }
+    };
+
+    function showWiringInfo(id) {
+      // Remove active class from all SVG elements first
+      document.querySelectorAll('.svg-node').forEach(node => node.classList.remove('active'));
+      document.querySelectorAll('.svg-cable').forEach(cable => cable.classList.remove('active'));
+
+      // Highlight target element
+      const el = document.getElementById('node-' + id) || document.getElementById('cable-' + id);
+      if (el) el.classList.add('active');
+
+      const data = wiringData[id];
+      if (data) {
+        document.getElementById('wiring-info-panel').querySelector('h3').textContent = data.title;
+        document.getElementById('wiring-desc').textContent = data.desc;
+        document.getElementById('wiring-pin').textContent = data.pin;
+        document.getElementById('wiring-volt').textContent = data.volt;
+        document.getElementById('wiring-prot').textContent = data.prot;
+        document.getElementById('wiring-meta').style.display = 'block';
+      }
+    }
+
+    // Network Diagram Data Info
+    const networkData = {
+      'starlink': {
+        title: 'Starlink WAN Gateway',
+        desc: 'Upstream gateway connected to the low-orbit satellite grid. Exposes a router DHCP lease address at 192.168.100.1.',
+        interface: 'Physical Satellite Array',
+        subnet: '192.168.100.1 / 255.255.255.0',
+        service: 'Starlink Core DHCP Daemon'
+      },
+      'pi-net': {
+        title: 'Raspberry Pi Router Core',
+        desc: 'Acts as the boat LAN coordinator. Automatically bridges networks using NAT IP masquerade (wlan0 client requests forward to eth0 WAN).',
+        interface: 'Routing Table / System Bridge',
+        subnet: '192.168.5.1 (AP) & 192.168.100.100 (Wired)',
+        service: 'systemd-networkd / iptables-persistent'
+      },
+      'ipad': {
+        title: 'iPad Pro Helm Terminal',
+        desc: 'Helm-mounted display. Automatically fetches dashboard HTML templates and connects directly to Signal K sockets at port 3000.',
+        interface: 'WiFi client (wlan0)',
+        subnet: 'DHCP leased 192.168.5.2 to .20',
+        service: 'Safari Browser / WilhelmSK app'
+      },
+      'bg-instruments': {
+        title: 'B&G CAN-Bus Sensors',
+        desc: 'Sensors streaming live heading, depth, wind velocity, and speed through water values over raw differential CAN lines.',
+        interface: 'SocketCAN Bus spur line',
+        subnet: 'Protocol Address ID (250kbps)',
+        service: 'N2K Microcode Firmware'
+      },
+      'ap-bubble': {
+        title: 'Rambler_Net WiFi Access Point',
+        desc: 'Local boat SSID broadcast continuously. Ensures all crew tablets, phones, and instruments can connect securely without internet.',
+        interface: 'wlan0 transmitter antenna',
+        subnet: 'SSID: Rambler_Net | Password: RAMBLER2026',
+        service: 'hostapd + dnsmasq'
+      },
+      'link-starlink': {
+        title: 'WAN WAN Bridge Link',
+        desc: 'Wired Ethernet connection between XTAR-Link LAN port and Pi eth0. Receives dynamic WAN addresses via DHCP.',
+        interface: 'eth0 hardware port',
+        subnet: '192.168.100.100 IP assigned',
+        service: 'dhcpcd client daemon'
+      },
+      'link-nmea': {
+        title: 'CAN Bus Data Link',
+        desc: 'Drop cable connection carrying raw physical CAN transceiver frame packets directly into the PICAN-M hardware layer.',
+        interface: 'can0 SocketCAN driver',
+        subnet: 'CAN Bitrate: 250000',
+        service: 'systemd-networkd (80-can.network)'
+      },
+      'link-wlan0': {
+        title: 'AP Broadcast Channel',
+        desc: 'Software bridge connecting hostapd configuration bindings directly to the physical wlan0 radio chip inside the Pi.',
+        interface: 'wlan0 hardware radio',
+        subnet: '192.168.5.1 static IP',
+        service: 'hostapd daemon'
+      },
+      'link-wifi': {
+        title: 'Client Wi-Fi Connect',
+        desc: 'Wireless client session bridging deck tablets directly into the local AP network. Transmits dashboard pages and WebSockets.',
+        interface: '802.11g wireless connection',
+        subnet: 'IP leased dynamically by Pi',
+        service: 'dnsmasq DHCP allocate'
+      }
+    };
+
+    function showNetworkInfo(id) {
+      // Remove active class from all SVG elements first
+      document.querySelectorAll('.svg-node').forEach(node => node.classList.remove('active'));
+      document.querySelectorAll('.svg-cable').forEach(cable => cable.classList.remove('active'));
+
+      // Highlight target element
+      const el = document.getElementById('net-node-' + id) || document.getElementById('net-cable-' + id);
+      if (el) el.classList.add('active');
+
+      const data = networkData[id];
+      if (data) {
+        document.getElementById('network-info-panel').querySelector('h3').textContent = data.title;
+        document.getElementById('network-desc').textContent = data.desc;
+        document.getElementById('network-int').textContent = data.interface;
+        document.getElementById('network-sub').textContent = data.subnet;
+        document.getElementById('network-serv').textContent = data.service;
+        document.getElementById('network-meta').style.display = 'block';
+      }
+    }
+
+    // Diagnostic Console Simulation Scripts
+    const terminalLogs = {
+      'iplink': [
+        'guarox@rambler:~$ ip link show can0',
+        'can0: <NOARP,UP,LOWER_UP,ECHO> mtu 16 qdisc pfifo_fast state UP mode DEFAULT group default qlen 10',
+        '    link/can',
+        '    can <FD> state ERROR-ACTIVE restart-ms 100',
+        '    bitrate 250000 sample-point 0.875',
+        '    tq 250 prop-seg 6 phase-seg1 7 phase-seg2 2 sjw 1',
+        '    mcp251x: tseg1 3..16 tseg2 2..8 sjw 1..4 brp 1..64 tq 1',
+        '    re-tx-max 0',
+        '    clock 16000000',
+        'guarox@rambler:~$ '
+      ],
+      'candump': [
+        'guarox@rambler:~$ candump can0',
+        '  can0  0df01000   [8]  01 02 03 04 05 06 07 08',
+        '  can0  09f80100   [8]  ff 7f ff ff 00 1a 2b 3c',
+        '  can0  0df01000   [8]  01 02 03 04 05 06 07 08',
+        '  can0  1df00500   [8]  fa 01 00 ff 3c 1a f0 02',
+        '  can0  09f80200   [8]  50 2e 00 00 ff ff 7f ff',
+        '  can0  09f10900   [8]  00 15 2b 3c ff ff ff ff',
+        '  can0  0df01000   [8]  01 02 03 04 05 06 07 08',
+        '  can0  1df00500   [8]  fa 01 00 ff 3c 1a f0 02',
+        '  can0  0df01000   [8]  01 02 03 04 05 06 07 08',
+        '  can0  09f80100   [8]  ff 7f ff ff 00 1a 2b 3c',
+        '... scrolling hex frames continuous (1Hz updates) ...',
+        'guarox@rambler:~$ '
+      ],
+      'status-network': [
+        'guarox@rambler:~$ systemctl status systemd-networkd',
+        '● systemd-networkd.service - Network Configuration',
+        '     Loaded: loaded (/lib/systemd/system/systemd-networkd.service; enabled; preset: enabled)',
+        '     Active: active (running) since Mon 2026-05-25 07:12:04 EST; 25min ago',
+        '       Docs: man:systemd-networkd.service(8)',
+        '             man:org.freedesktop.network1(5)',
+        '   Main PID: 452 (systemd-network)',
+        '     Status: "Processing requests..."',
+        '      Tasks: 1 (limit: 8794)',
+        '        CPU: 145ms',
+        '     CGroup: /system.slice/systemd-networkd.service',
+        '             └─452 /lib/systemd/systemd-networkd',
+        '',
+        'May 25 07:12:05 rambler systemd-networkd[452]: can0: Link UP',
+        'May 25 07:12:05 rambler systemd-networkd[452]: can0: Gained carrier',
+        'May 25 07:12:05 rambler systemd-networkd[452]: wlan0: Link UP',
+        'May 25 07:12:05 rambler systemd-networkd[452]: eth0: Link UP - 1Gbps/Full',
+        'guarox@rambler:~$ '
+      ],
+      'status-sk': [
+        'guarox@rambler:~$ systemctl status signalk',
+        '● signalk.service - Signal K Server',
+        '     Loaded: loaded (/etc/systemd/system/signalk.service; enabled; vendor preset: enabled)',
+        '     Active: active (running) since Mon 2026-05-25 07:12:08 EST; 25min ago',
+        '   Main PID: 618 (node)',
+        '      Tasks: 11 (limit: 8794)',
+        '     Memory: 65.4M',
+        '        CPU: 4.851s',
+        '     CGroup: /system.slice/signalk.service',
+        '             └─618 /usr/bin/signalk-server --port 3000',
+        '',
+        'May 25 07:12:10 rambler signalk-server[618]: signalk-server listening on port 3000',
+        'May 25 07:12:11 rambler signalk-server[618]: [canboatjs] Opened SocketCAN interface: can0',
+        'May 25 07:12:12 rambler signalk-server[618]: [canboatjs] N2K parser pipeline initialized',
+        'May 25 07:12:12 rambler signalk-server[618]: [signalk] WS connection provider mounted at /signalk/v1/stream',
+        'guarox@rambler:~$ '
+      ],
+      'wlan-ap': [
+        'guarox@rambler:~$ ip addr show wlan0',
+        '3: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000',
+        '    link/ether b8:27:eb:d3:05:4f brd ff:ff:ff:ff:ff:ff',
+        '    inet 192.168.5.1/24 brd 192.168.5.255 scope global wlan0',
+        '       valid_lft forever preferred_lft forever',
+        '    inet6 fe80::ba27:ebff:fed3:54f/64 scope link',
+        '       valid_lft forever preferred_lft forever',
+        'guarox@rambler:~$ '
+      ]
+    };
+
+    let typingTimer = null;
+
+    function runCommand(cmdKey) {
+      // Clear current typing timers
+      if (typingTimer) clearInterval(typingTimer);
+
+      const buttons = document.querySelectorAll('.term-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      
+      // Find button clicked
+      const activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(cmdKey));
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const lines = terminalLogs[cmdKey];
+      const terminal = document.getElementById('term-out');
+      terminal.innerHTML = ''; // Clear terminal
+
+      let lineIndex = 0;
+      
+      // Typing effect for the first line (command)
+      const firstLine = lines[0];
+      let charIndex = 0;
+      
+      const typeCommand = () => {
+        if (charIndex < firstLine.length) {
+          terminal.innerHTML += firstLine.charAt(charIndex);
+          charIndex++;
+          // Keep typing
+          typingTimer = setTimeout(typeCommand, 30);
+        } else {
+          // Finished typing command line. Print output
+          terminal.innerHTML += '\n';
+          printOutputLines();
+        }
+      };
+      
+      const printOutputLines = () => {
+        lineIndex = 1;
+        const printNextLine = () => {
+          if (lineIndex < lines.length) {
+            terminal.innerHTML += lines[lineIndex] + '\n';
+            lineIndex++;
+            terminal.scrollTop = terminal.scrollHeight;
+            typingTimer = setTimeout(printNextLine, 60);
+          } else {
+            // Append cursor
+            terminal.innerHTML += '<span class="cursor"></span>';
+            terminal.scrollTop = terminal.scrollHeight;
+          }
+        };
+        printNextLine();
+      };
+
+      typeCommand();
+    }
+  </script>
+</body>
+</html>

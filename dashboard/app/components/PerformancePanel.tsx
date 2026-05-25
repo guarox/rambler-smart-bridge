@@ -86,19 +86,19 @@ export default function PerformancePanel({ boat, twdHistory, polarHistory, onAla
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Performance</h2>
         {/* Polar alarm controls */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">Alarm if polar &lt;</span>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-gray-500">Alarm &lt;</span>
           <input
             type="number"
             min={50} max={100} step={1}
             value={alarmThreshold}
             onChange={e => onAlarmThresholdChange(Number(e.target.value))}
-            className="w-14 bg-gray-800 border border-gray-600 rounded px-1.5 py-0.5 text-xs text-white font-mono text-center"
+            className="w-16 bg-gray-800 border border-gray-600 rounded px-2 py-1.5 text-sm text-white font-mono text-center min-h-[40px]"
           />
           <span className="text-xs text-gray-500">%</span>
           <button
             onClick={() => { setAlarmEnabled(v => !v); setAlarmFiring(false); consecutiveBelowRef.current = 0; }}
-            className={`px-2 py-0.5 rounded text-xs font-bold border transition-colors ${
+            className={`min-h-[44px] px-3 py-2 rounded text-sm font-bold border transition-colors ${
               alarmEnabled ? "bg-red-700 border-red-500 text-white" : "border-gray-600 text-gray-500 hover:text-white"
             }`}
           >
@@ -106,7 +106,7 @@ export default function PerformancePanel({ boat, twdHistory, polarHistory, onAla
           </button>
           {alarmFiring && (
             <button onClick={dismiss}
-              className="px-2 py-0.5 rounded text-xs font-bold bg-orange-600 border border-orange-400 text-white animate-bounce">
+              className="min-h-[44px] px-3 py-2 rounded text-sm font-bold bg-orange-600 border border-orange-400 text-white animate-bounce">
               ACK
             </button>
           )}

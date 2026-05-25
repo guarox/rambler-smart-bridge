@@ -6,7 +6,7 @@
 ---
 
 ## 1. Project Overview & Current Status
-The hardware foundation for the **Rambler Smart Bridge** has been established utilizing a **Raspberry Pi 5** paired with a **PICAN-M HAT** (NMEA 2000 to N2K & SeaTalkNG / Power Delivery). The core hardware is housed in a marine-grade enclosure and integrated into the boat's primary NMEA 2000 backbone alongside the existing B&G instrument cluster.
+The hardware foundation for the **Rambler Smart Bridge** has been established utilizing a **Raspberry Pi 4** paired with a **PICAN-M HAT** (NMEA 2000 to N2K & SeaTalkNG / Power Delivery). The core hardware is housed in a marine-grade enclosure and integrated into the boat's primary NMEA 2000 backbone alongside the existing B&G instrument cluster.
 
 The goal of Phase 2 is to shift focus from physical assembly to **Data Pipeline Engineering, Networking Strategy, and Weather Model Integration** to give the crew a tactical, data-driven edge during the 2026 racing season (including the upcoming Spring Opener, NOOD Distance, Chicago Mac, and Bayview Mac).
 
@@ -17,11 +17,11 @@ The goal of Phase 2 is to shift focus from physical assembly to **Data Pipeline 
 A key challenge for *Rambler* is managing power constraints and network topology depending on the racing environment. The networking configuration must dynamically adjust between high-bandwidth offshore delivery modes and low-power closed-circuit day racing.
 
 ### 2.1 Dual-Mode Network Configuration
-To balance real-time cloud synchronizations via Starlink with power preservation during strict offshore or local day races, the Raspberry Pi 5 will implement an automated, script-driven dual networking topology:
+To balance real-time cloud synchronizations via Starlink with power preservation during strict offshore or local day races, the Raspberry Pi 4 will implement an automated, script-driven dual networking topology:
 
 1. **Race Mode (Local Off-Grid WAP):**
    * **Trigger:** Starlink router offline / Power conservation mode active.
-   * **Action:** The Raspberry Pi 5 boots as a standalone **Wireless Access Point (WAP)** utilizing `hostapd` and `dnsmasq`. 
+   * **Action:** The Raspberry Pi 4 boots as a standalone **Wireless Access Point (WAP)** utilizing `hostapd` and `dnsmasq`. 
    * **Architecture:** Broadcasts a dedicated local SSID (e.g., `Rambler_Net`). Crew tablets, smartphones running tactical software (like Expedition or iRegatta), and onboard displays connect directly to the Pi. 
    * **Data Flow:** Local instrument streams (B&G data, AIS feeds) are multiplexed and broadcast locally without requiring external internet infrastructure.
 2. **Delivery / Cloud Mode (Internet Connected):**
@@ -149,5 +149,5 @@ AIS targets are identified by MMSI. For racing, crew can maintain a short list o
 Before deploying the Phase 2 code layers, the following physical and power configurations must be verified:
 
 * [ ] **Physical Bus Termination:** Ensure that the PICAN-M HAT is configured correctly within the NMEA 2000 backbone loop. If positioned at the physical end-of-the-line, the internal 120-ohm termination resistor jumper must be safely engaged.
-* [ ] **Isolated Marine Power Supply:** To protect hardware from power drops during engine ignition or heavy battery load, deploy a dedicated, regulated isolated DC-to-DC 12V-to-5V power step-down converter to feed the Pi 5 clean amperage via USB-C or the GPIO power pins.
+* [ ] **Isolated Marine Power Supply:** To protect hardware from power drops during engine ignition or heavy battery load, deploy a dedicated, regulated isolated DC-to-DC 12V-to-5V power step-down converter to feed the Pi 4 clean amperage via USB-C or the GPIO power pins.
 * [ ] **Storage Health:** Configure InfluxDB data retention policies to automatically prune historical datasets older than 30 days to avoid wearing down the local microSD card, or move the database engine onto an external NVMe SSD base.

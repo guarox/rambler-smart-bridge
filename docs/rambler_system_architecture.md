@@ -19,7 +19,7 @@ This document establishes the hardware specifications, network topology, and dep
                                    | (Wired RJ45 / UDP Raw PGNs)
                                    v
 +------------------+  Wired LAN    +--------------+--------------+
-| Modified Gen 3   |-------------->| Raspberry Pi 5 Gateway      |
+| Modified Gen 3   |-------------->| Raspberry Pi 4 Gateway      |
 | Starlink (12V)   |               | OS: OpenPlotter / Signal K   |
 +------------------+               +--------------+--------------+
   (On-Demand Power)                               |
@@ -32,7 +32,7 @@ This document establishes the hardware specifications, network topology, and dep
 ```
 
 ### The Operational Workflow
-1. **The Brain (Raspberry Pi 5):** Runs continuously on a ultra-low draw (~5W) 12V buck regulator. It acts as the local network Master, broadcasting a permanent Wi-Fi access point (`Rambler_Data`).
+1. **The Brain (Raspberry Pi 4):** Runs continuously on a ultra-low draw (~5W) 12V buck regulator. It acts as the local network Master, broadcasting a permanent Wi-Fi access point (`Rambler_Data`).
 2. **Telemetry Ingestion:** The Digital Yacht LANLink reads the NMEA 2000 backbone and pushes a continuous, raw binary PGN stream to the Pi via a dedicated wired Ethernet port.
 3. **Local Recording:** Signal K converts raw PGNs to universal JSON data. The InfluxDB plugin logs all target AIS strings, target SOG/COG, and local performance data directly to the local storage arrays.
 4. **On-Demand Routing & Bridging:** For offshore legs requiring weather routing, a dedicated 12V marine switch boots the Starlink system. The Pi senses upstream WAN internet via the DC PoE injector, routes the internet to the iPad on deck, and updates local HRRR weather data layers. When updates finish, the Starlink is turned off, dropping the boat's draw back to baseline while retaining all local data and instrument displays.
@@ -58,8 +58,8 @@ This document establishes the hardware specifications, network topology, and dep
 
 ## 3. Core Hardware Specifications
 
-### Master Controller: Raspberry Pi 5
-* **Processor & Memory:** Broadcom BCM2712 Quad-core ARM Cortex-A76 @ 2.4GHz, **8GB LPDDR4X-4267 RAM**.
+### Master Controller: Raspberry Pi 4
+* **Processor & Memory:** Broadcom BCM2711 Quad-core ARM Cortex-A72 @ 1.5GHz, **8GB LPDDR4-3200 SDRAM**.
 * **Storage Array:** High-End 64GB or 128GB Endurance MicroSD Card (Class 10 / U3 / V30) optimized for dense database read/write cycles.
 * **Operating System:** OpenPlotter 4 (64-bit Core) running Linux architecture.
 * **Core Services:** Signal K Node Server, InfluxDB time-series engine, Grafana visualization system, Node-RED automation runtime.
@@ -92,7 +92,7 @@ Operating a standard Starlink terminal via a traditional AC inverter causes an a
 | **Power Delivery** | Integrated 12V-to-56V Step-Up + PoE | Integrated 12V-to-56V Step-Up + PoE |
 | **Average Power Draw** | **28W - 42W** (highly dependent on Pi router configuration) | **35W - 55W** |
 | **Footprint Index** | Ultra-Compact ($10\text{cm} \times 6\text{cm} 	imes 3\text{cm}$) | Large Panel Footprint |
-| **Strategic Fit** | **Optimal for Rambler:** Drops spatial demands and costs by shifting router roles directly onto the RPi 5. | Heavy/Overland configuration. Unneeded cost overhead since Pi handles data. |
+| **Strategic Fit** | **Optimal for Rambler:** Drops spatial demands and costs by shifting router roles directly onto the RPi 4. | Heavy/Overland configuration. Unneeded cost overhead since Pi handles data. |
 
 ---
 
@@ -104,13 +104,44 @@ Operating a standard Starlink terminal via a traditional AC inverter causes an a
 * [x] **Ancor NMEA 2000 Drop Cable** (Heavy duty double-shielded, length tailored to panel location)
 
 ### Section B: Network Core & Processors
-* [x] **Raspberry Pi 5 (8GB Model)**
+* [x] **Raspberry Pi 4 (8GB Model)**
 * [x] **EDAL/GeeekPi Metal Armor Passively Cooled Enclosure** (Protects against marine atmospheric moisture and high interior cabin temperatures; prevents thermal throttling)
 * [x] **SanDisk MAX Endurance 128GB MicroSDXC Card**
 * [x] **Shielded CAT6 Ethernet Cables** (x2, 0.5-meter short patch lines for physical link stability)
-* [ ] **12V→5V 5A 25W USB-C Buck Converter** — ORDERING: Acridine generic (2-pack, daily runner) + marine-grade isolated DC-DC converter (Victron Orion or equivalent, hot spare)
+* [ ] **12V→5V 3A 15W (or 5A 25W) USB-C Buck Converter** — ORDERING: Acridine generic (2-pack, daily runner) + marine-grade isolated DC-DC converter (Victron Orion or equivalent, hot spare)
 
 ### Section C: Starlink 12V DC Conversion Module
 * [x] **XTAR-Link EL6 V3 12V Conversion Interface Module**
 * [x] **Marine Grade 14AWG Red/Black Tinned Wire Harness** (Connects house electrical bus bars to the XTAR-Link module)
 * [ ] **Panel Toggle Switch** — ORDERING: Blue Sea 4153 WeatherDeck SPST ON-OFF (maintained contact, 20A) — *Note: original spec called for momentary; 4151 is wrong part*
+
+---
+
+## 5. Weather Ingestion & Routing Engine Integration
+
+To achieve professional-grade tactical decision support, the Smart Bridge integrates high-resolution regional weather forecast grids and cloud-based weather routing computations.
+
+### 5.1 NOAA HRRR GRIB2 Ingestion
+* **Service script:** `[NEW]` [download_hrrr.py](file:///Users/guarox/claude/rambler/docs/download_hrrr.py) running on the Pi.
+* **Execution trigger:** Automatically executes via a system hook when Starlink WAN is detected.
+* **Mechanism:** 
+  1. Queries the NOAA NOMADS GRIB filter CGI endpoint.
+  2. Binds coordinates to the Great Lakes region (Lake Michigan / Huron: Lat 41.0N to 46.5N, Lon -88.5W to -84.0W).
+  3. Filters downloaded parameters to `UGRD` (U wind vector component) and `VGRD` (V wind vector component) at `10 m above ground`.
+  4. Keeps download payload size under ~150KB for rapid ingestion over Starlink connections.
+  5. Decodes and writes grid coordinate speed/direction records to a cached local JSON file `/home/guarox/gribs/hrrr_latest.json`.
+  6. Provides fallback synthetic grids if offline, keeping helm displays functional.
+* **Local API Serving:** The Next.js dashboard reads this local JSON grid at `/api/weather/hrrr` and redraws the 345 wind arrows dynamically across the Leaflet maps on all connected crew tablets.
+
+### 5.2 PredictWind Weather Routing Bridge
+* **Service route:** Exposes the weather router bridge at `/api/predictwind` via the dashboard local server.
+* **Calculation variables:** Uses the vessel's current coordinate position (sourced from Signal K `navigation.position`), active race waypoints, and the J/99 polar files.
+* **Model processing:** Returns isochrone-routed optimal paths color-coded for standard forecast models:
+  * **PWG** (PredictWind GFS variant) - Orange
+  * **PWE** (PredictWind ECMWF variant) - Cyan
+  * **ECMWF** (European Center global model) - Pink
+  * **GFS** (Global Forecast System) - Blue
+  * **SPIRE** (Satellite-derived) - Purple
+  * **UKMO** (UK Met Office) - Yellow
+* **Tactical Indicators:** Overlays predicted tack/gybe coordinates on the helm chartplotter and tablet displays, noting target wind angles (TWA) and forecast schedule timings.
+

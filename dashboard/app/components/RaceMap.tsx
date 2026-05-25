@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import type { Map as LeafletMap, Marker, Polyline, Circle, DivIcon } from "leaflet";
-import { OwnBoat, WindCell } from "../lib/mockData";
+import { OwnBoat, WindCell, RouteState, MarkMetrics, Waypoint, TargetSource } from "../lib/mockData";
 
 interface TargetLive {
   mmsi: string;
@@ -17,12 +17,19 @@ interface TargetLive {
   isFaster: boolean;
   twa?: number;
   trail?: [number, number][];
+  source?: TargetSource;
 }
 
 interface Props {
   boat: OwnBoat & { trail?: [number, number][] };
   targets: TargetLive[];
   windGrid: WindCell[];
+  routeState?: RouteState;
+  markMetrics?: MarkMetrics | null;
+  predictWindRoutes?: any;
+  onAddWaypoint?: (lat: number, lon: number) => void;
+  onExpand?: () => void;
+  nightMode?: boolean;
 }
 
 function windArrowSvg(speed: number, dir: number, isActual = false): string {
@@ -37,16 +44,17 @@ function windArrowSvg(speed: number, dir: number, isActual = false): string {
   </svg>`;
 }
 
-function boatSvg(color: string, label: string, cog: number, isOwn = false): string {
-  const size = isOwn ? 70 : 60;
+function boatSvg(color: string, label: string, cog: number, isOwn = false, opacity = 1): string {
+  const size = isOwn ? 70 : 56;
   const half = size / 2;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="-${half} -${half} ${size} ${size}">
-    <g transform="rotate(${cog})">
+  const shortLabel = isOwn ? label : (label.length > 6 ? label.slice(0, 5) + "…" : label);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size + 14}" viewBox="-${half} -${half} ${size} ${size + 14}" opacity="${opacity}">
+    <g transform="rotate(${cog}, 0, 0)">
       <polygon points="0,-14 -7,12 0,7 7,12" fill="${color}" stroke="white" stroke-width="${isOwn ? 2 : 1}"/>
       ${isOwn ? `<circle r="4" fill="white" opacity="0.9"/>` : ""}
     </g>
-    <text y="${half - 4}" text-anchor="middle" font-size="${isOwn ? 10 : 9}" fill="white" font-family="sans-serif"
-      style="text-shadow:0 0 3px #000,0 0 3px #000">${label}</text>
+    <text y="${half + 10}" text-anchor="middle" font-size="${isOwn ? 10 : 8}" fill="white" font-family="sans-serif" font-weight="${isOwn ? "bold" : "normal"}"
+      style="text-shadow:0 0 3px #000,0 1px 3px #000">${shortLabel}</text>
   </svg>`;
 }
 
@@ -85,7 +93,13 @@ function competitorColor(closingRate: number): string {
   return "#facc15";                            // steady = yellow
 }
 
-export default function RaceMap({ boat, targets, windGrid }: Props) {
+function waypointSvg(w: Waypoint, isActive: boolean): string {
+  const color = isActive ? "#60a5fa" : w.type === "start-port" ? "#f87171" : w.type === "start-stbd" ? "#86efac" : "#e2e8f0";
+  const symbol = w.type === "mark" ? "✦" : w.type === "start-port" ? "◀" : "▶";
+  return `<div style="color:${color};font-size:18px;text-shadow:0 0 4px #000,0 0 4px #000;line-height:1;cursor:pointer">${symbol}</div>`;
+}
+
+export default function RaceMap({ boat, targets, windGrid, routeState, markMetrics, predictWindRoutes, onAddWaypoint, onExpand, nightMode }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const ramblerMarkerRef = useRef<Marker | null>(null);
@@ -97,15 +111,24 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
   const laylineStbdRef = useRef<Polyline | null>(null);
   const windMarkersRef = useRef<Marker[]>([]);
   const actualWindMarkerRef = useRef<Marker | null>(null);
+  const pwPolylinesRef = useRef<Record<string, Polyline>>({});
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pwMarkersRef = useRef<any[]>([]);
   const [showLaylines, setShowLaylines] = React.useState(true);
   const [showRings, setShowRings] = React.useState(false);
-  const [rulerActive, setRulerActive] = React.useState(false);
+  const [mapMode, setMapMode] = React.useState<"pan" | "addMark" | "ruler">("pan");
   const [rulerHasContent, setRulerHasContent] = React.useState(false);
   const rangeRingsRef = useRef<Circle[]>([]);
   const rulerStartRef = useRef<[number, number] | null>(null);
   const rulerLineRef = useRef<Polyline | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rulerMarkersRef = useRef<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const waypointMarkersRef = useRef<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const baseTileRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const seamarkTileRef = useRef<any>(null);
 
   // Initialize map once
   useEffect(() => {
@@ -118,27 +141,35 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((container as any)._leaflet_id) return;
 
-      const map = L.map(container, { center: [boat.lat, boat.lon], zoom: 12, zoomControl: true });
+      const map = L.map(container, { center: [boat.lat, boat.lon], zoom: 14, zoomControl: true });
       mapRef.current = map;
 
       const makeIcon = (svg: string, size: number): DivIcon =>
         L.divIcon({ html: svg, className: "", iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
 
-      // Esri Ocean Basemap — marine chart with depth contours
-      L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}",
-        { attribution: "Esri Ocean Basemap", maxZoom: 16 }
+      // CARTO Voyager — reliable production tile server, no API key, global coverage
+      baseTileRef.current = L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+        {
+          attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: "abcd",
+          maxZoom: 19
+        }
       ).addTo(map);
 
-      // Esri Ocean Reference overlay — labels, nav aids, buoys
-      L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Reference/MapServer/tile/{z}/{y}/{x}",
-        { attribution: "", maxZoom: 16, opacity: 0.9 }
+      // OpenSeaMap nautical overlay — buoys, depth contours, nav aids
+      seamarkTileRef.current = L.tileLayer(
+        "https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png",
+        {
+          attribution: '© <a href="https://www.openseamap.org">OpenSeaMap</a>',
+          maxZoom: 18,
+          opacity: 0.8
+        }
       ).addTo(map);
 
       // Laylines (port = red dashed, starboard = green dashed)
-      const portEnd = projectPoint(boat.lat, boat.lon, (boat.twd + boat.twa + 360) % 360, 3);
-      const stbdEnd = projectPoint(boat.lat, boat.lon, (boat.twd - boat.twa + 360) % 360, 3);
+      const portEnd = projectPoint(boat.lat, boat.lon, (boat.twd + boat.twa + 360) % 360, 1.5);
+      const stbdEnd = projectPoint(boat.lat, boat.lon, (boat.twd - boat.twa + 360) % 360, 1.5);
       laylinePortRef.current = L.polyline([[boat.lat, boat.lon], portEnd], {
         color: "#f87171", weight: 2.5, opacity: 0.9, dashArray: "8 5",
       }).addTo(map);
@@ -157,36 +188,31 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
         zIndexOffset: 1000,
       }).addTo(map).bindPopup(`<b>Rambler USA 99</b><br>SOG: ${boat.sog.toFixed(1)} kts · COG: ${Math.round(boat.cog)}° · TWA: ${Math.round(boat.twa)}°`);
 
-      // Competitor markers + trails + bearing lines
+      // Competitor markers + trails (no bearing lines — too cluttered with 14 boats)
       targets.forEach((t) => {
         const color = competitorColor(t.closingRate);
-
-        // Bearing line from Rambler to target
-        const bl = L.polyline([[boat.lat, boat.lon], [t.lat, t.lon]], {
-          color, weight: 1, opacity: 0.4, dashArray: "3 5",
-        }).addTo(map);
-        bearingLinesRef.current.set(t.mmsi, bl);
+        const isYB = t.source === "yellowbrick";
+        const trailOpacity = isYB ? 0.35 : 0.6;
+        const dashArray = isYB ? "3 8" : "4 4";
+        const markerOpacity = isYB ? 0.55 : 1;
 
         // Trail (renders under marker)
         const trail = L.polyline([[t.lat, t.lon]], {
-          color, weight: 2, opacity: 0.6, dashArray: "4 4",
+          color, weight: 2, opacity: trailOpacity, dashArray,
         }).addTo(map);
         targetTrailsRef.current.set(t.mmsi, trail);
 
-        const m = L.marker([t.lat, t.lon], { icon: makeIcon(boatSvg(color, t.name, t.cog), 60) })
+        const m = L.marker([t.lat, t.lon], { icon: makeIcon(boatSvg(color, t.name, t.cog, false, markerOpacity), 60) })
           .addTo(map)
-          .bindPopup(`<b>${t.name}</b><br>SOG: ${t.sog.toFixed(1)} kts · Dist: ${t.distance.toFixed(2)} nm · Bearing: ${Math.round(t.bearing)}°<br>${t.closingRate < 0 ? "▼ Closing" : "▲ Opening"} ${Math.abs(t.closingRate).toFixed(2)} nm/hr<br>${t.isHigher ? "We higher" : "They higher"} · ${t.isFaster ? "We faster" : "They faster"}`);
+          .bindPopup(`<b>${t.name}${isYB ? " (YB)" : ""}</b><br>SOG: ${t.sog.toFixed(1)} kts · Dist: ${t.distance.toFixed(2)} nm · Bearing: ${Math.round(t.bearing)}°<br>${t.closingRate < 0 ? "▼ Closing" : "▲ Opening"} ${Math.abs(t.closingRate).toFixed(2)} nm/hr<br>${t.isHigher ? "We higher" : "They higher"} · ${t.isFaster ? "We faster" : "They faster"}`);
         targetMarkersRef.current.set(t.mmsi, m);
       });
 
-      // HRRR wind arrows (static grid, updated separately)
-      windGrid.forEach((cell) => {
-        const m = L.marker([cell.lat, cell.lon], {
-          icon: makeIcon(windArrowSvg(cell.speed, cell.dir), 40),
-          interactive: false,
-        }).addTo(map);
-        windMarkersRef.current.push(m);
-      });
+      // Auto-fit fleet after init
+      if (targets.length > 0) {
+        const allLatLngs: [number, number][] = [[boat.lat, boat.lon], ...targets.map(t => [t.lat, t.lon] as [number, number])];
+        map.fitBounds(L.latLngBounds(allLatLngs).pad(0.25));
+      }
 
       // B&G actual wind arrow
       actualWindMarkerRef.current = L.marker([boat.lat, boat.lon - 0.01], {
@@ -222,9 +248,9 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
       const makeIcon = (svg: string, size: number): DivIcon =>
         L.divIcon({ html: svg, className: "", iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
 
-      // Update laylines
-      const portEnd = projectPoint(boat.lat, boat.lon, (boat.twd + (boat as any).twa + 360) % 360, 3);
-      const stbdEnd = projectPoint(boat.lat, boat.lon, (boat.twd - (boat as any).twa + 360) % 360, 3);
+      // Update laylines from boat position (when no mark active, mark-layline effect overrides)
+      const portEnd = projectPoint(boat.lat, boat.lon, (boat.twd + (boat as any).twa + 360) % 360, 1.5);
+      const stbdEnd = projectPoint(boat.lat, boat.lon, (boat.twd - (boat as any).twa + 360) % 360, 1.5);
       laylinePortRef.current?.setLatLngs([[boat.lat, boat.lon], portEnd]);
       laylineStbdRef.current?.setLatLngs([[boat.lat, boat.lon], stbdEnd]);
 
@@ -242,28 +268,21 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
       // Update competitors + trails + bearing lines
       targets.forEach((t) => {
         const color = competitorColor(t.closingRate);
+        const isYB = t.source === "yellowbrick";
+        const trailOpacity = isYB ? 0.35 : 0.6;
+        const dashArray = isYB ? "3 8" : "4 4";
+        const markerOpacity = isYB ? 0.55 : 1;
+
         const m = targetMarkersRef.current.get(t.mmsi);
         if (m) {
           m.setLatLng([t.lat, t.lon])
-            .setIcon(makeIcon(boatSvg(color, t.name, t.cog), 60))
-            .setPopupContent(`<b>${t.name}</b><br>SOG: ${t.sog.toFixed(1)} kts · Dist: ${t.distance.toFixed(2)} nm · Bearing: ${Math.round(t.bearing)}°<br>${t.closingRate < 0 ? "▼ Closing" : "▲ Opening"} ${Math.abs(t.closingRate).toFixed(2)} nm/hr<br>${t.isHigher ? "We higher" : "They higher"} · ${t.isFaster ? "We faster" : "They faster"}`);
+            .setIcon(makeIcon(boatSvg(color, t.name, t.cog, false, markerOpacity), 60))
+            .setPopupContent(`<b>${t.name}${isYB ? " (YB)" : ""}</b><br>SOG: ${t.sog.toFixed(1)} kts · Dist: ${t.distance.toFixed(2)} nm · Bearing: ${Math.round(t.bearing)}°<br>${t.closingRate < 0 ? "▼ Closing" : "▲ Opening"} ${Math.abs(t.closingRate).toFixed(2)} nm/hr<br>${t.isHigher ? "We higher" : "They higher"} · ${t.isFaster ? "We faster" : "They faster"}`);
         }
         const trail = targetTrailsRef.current.get(t.mmsi);
         if (trail && t.trail) {
           trail.setLatLngs(t.trail);
-          trail.setStyle({ color });
-        }
-        const bl = bearingLinesRef.current.get(t.mmsi);
-        if (bl) {
-          bl.setLatLngs([[boat.lat, boat.lon], [t.lat, t.lon]]);
-          bl.setStyle({ color });
-        }
-      });
-
-      // Update wind arrows
-      windMarkersRef.current.forEach((m, i) => {
-        if (windGrid[i]) {
-          m.setIcon(makeIcon(windArrowSvg(windGrid[i].speed, windGrid[i].dir), 40));
+          trail.setStyle({ color, opacity: trailOpacity, dashArray });
         }
       });
 
@@ -277,7 +296,7 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
       // Update range ring centers
       rangeRingsRef.current.forEach(ring => ring.setLatLng([boat.lat, boat.lon]));
     });
-  }, [boat, targets, windGrid]);
+  }, [boat, targets]);
 
   // Show/hide laylines when toggle changes
   useEffect(() => {
@@ -291,6 +310,119 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
   useEffect(() => {
     rangeRingsRef.current.forEach(ring => ring.setStyle({ opacity: showRings ? 0.7 : 0 }));
   }, [showRings]);
+
+  // PredictWind Weather Routing Layer
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    import("leaflet").then((L) => {
+      // 1. Clear previous PredictWind routes & markers
+      Object.values(pwPolylinesRef.current).forEach(line => line.remove());
+      pwPolylinesRef.current = {};
+      pwMarkersRef.current.forEach(marker => marker.remove());
+      pwMarkersRef.current = [];
+
+      if (!predictWindRoutes) return;
+
+      const modelColors: Record<string, string> = {
+        PWG: "#f97316",   // Orange
+        PWE: "#06b6d4",   // Cyan
+        ECMWF: "#d946ef", // Pink
+        GFS: "#3b82f6",   // Blue
+        SPIRE: "#8b5cf6", // Purple
+        UKMO: "#eab308",  // Yellow
+      };
+
+      // 2. Draw route line and tack/gybe markers for each model
+      Object.entries(predictWindRoutes).forEach(([model, routeData]: [string, any]) => {
+        const color = modelColors[model] || "#a1a1aa";
+        const points = routeData.points as [number, number][];
+
+        // Draw the track polyline
+        const line = L.polyline(points, {
+          color,
+          weight: 3,
+          opacity: 0.85,
+        }).addTo(map);
+        
+        line.bindPopup(`<b>${model} Optimal Route</b><br>Distance: ${routeData.summary.distanceNm} nm<br>Est. Time: ${routeData.summary.timeHrs} hrs<br>Avg Speed: ${routeData.summary.avgSpeed} kts`);
+        pwPolylinesRef.current[model] = line;
+
+        // Draw tack & gybe markers
+        const tacksGybes = routeData.tacksGybes || [];
+        tacksGybes.forEach((event: any) => {
+          const iconHtml = `<div style="background:${color};border:2px solid white;width:12px;height:12px;border-radius:999px;box-shadow:0 0 4px rgba(0,0,0,0.5);" title="${model}: ${event.type.toUpperCase()} (TWA ${event.twa}°, ${event.time})"></div>`;
+          const marker = L.marker([event.lat, event.lon], {
+            icon: L.divIcon({
+              html: iconHtml,
+              className: "",
+              iconSize: [12, 12],
+              iconAnchor: [6, 6]
+            })
+          }).addTo(map);
+
+          marker.bindTooltip(`<b>${model} ${event.type.toUpperCase()}</b><br>TWA: ${event.twa}°<br>Time: ${event.time}`, {
+            direction: "top"
+          });
+          
+          pwMarkersRef.current.push(marker);
+        });
+      });
+    });
+  }, [predictWindRoutes]);
+
+  // HRRR Wind Grid Layer (dynamically redraws when grid size/values change)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    import("leaflet").then((L) => {
+      // 1. Clear previous wind markers
+      windMarkersRef.current.forEach(m => m.remove());
+      windMarkersRef.current = [];
+
+      const makeIcon = (svg: string, size: number): DivIcon =>
+        L.divIcon({ html: svg, className: "", iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
+
+      // 2. Draw new wind markers
+      windGrid.forEach((cell) => {
+        const m = L.marker([cell.lat, cell.lon], {
+          icon: makeIcon(windArrowSvg(cell.speed, cell.dir), 40),
+          interactive: false,
+        }).addTo(map);
+        windMarkersRef.current.push(m);
+      });
+    });
+  }, [windGrid]);
+
+  // Swap tile layer when nightMode changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    import("leaflet").then((L) => {
+      if (!map) return;
+
+      // Remove current base tile layer
+      if (baseTileRef.current) {
+        map.removeLayer(baseTileRef.current);
+      }
+
+      const tileUrl = nightMode
+        ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+
+      baseTileRef.current = L.tileLayer(tileUrl, {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: "abcd",
+        maxZoom: 19,
+      }).addTo(map);
+
+      // Keep the new base tile behind the seamark overlay
+      baseTileRef.current.bringToBack();
+    });
+  }, [nightMode]);
 
   // Ruler tool — click-to-measure
   useEffect(() => {
@@ -306,7 +438,7 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
       setRulerHasContent(false);
     };
 
-    if (!rulerActive) { clearRuler(); return; }
+    if (mapMode !== "ruler") { clearRuler(); return; }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleClick = (e: any) => {
@@ -323,14 +455,18 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
           rulerMarkersRef.current.push(dot);
           setRulerHasContent(true);
         } else {
-          // Second click — red end dot, draw line, show label
+          // Second click — remove all previous markers first (fixes orphaned start dot bug)
           const [sLat, sLon] = rulerStartRef.current;
+          rulerLineRef.current?.remove();
+          rulerLineRef.current = null;
+          rulerMarkersRef.current.forEach(m => m.remove());
+          rulerMarkersRef.current = [];
+
           const dist = haversineNm(sLat, sLon, lat, lng);
           const brg = bearingBetween(sLat, sLon, lat, lng);
           const midLat = (sLat + lat) / 2;
           const midLon = (sLon + lng) / 2;
 
-          rulerLineRef.current?.remove();
           rulerLineRef.current = L.polyline([[sLat, sLon], [lat, lng]], {
             color: "#e2e8f0", weight: 2, dashArray: "6 4", opacity: 0.9,
           }).addTo(map);
@@ -348,10 +484,8 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
             }),
           }).addTo(map);
 
-          rulerMarkersRef.current.push(endDot, label);
-          // Reset for next measurement pair
+          rulerMarkersRef.current = [endDot, label];
           rulerStartRef.current = null;
-          rulerMarkersRef.current = rulerMarkersRef.current.filter(m => m === endDot || m === label);
           setRulerHasContent(true);
         }
       });
@@ -362,7 +496,7 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
       map.off("click", handleClick);
       clearRuler();
     };
-  }, [rulerActive]);
+  }, [mapMode]);
 
   const clearRulerCallback = React.useCallback(() => {
     rulerLineRef.current?.remove();
@@ -372,6 +506,65 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
     rulerStartRef.current = null;
     setRulerHasContent(false);
   }, []);
+
+  // Add mark mode — click handler
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || mapMode !== "addMark" || !onAddWaypoint) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleClick = (e: any) => {
+      onAddWaypoint(e.latlng.lat, e.latlng.lng);
+      setMapMode("pan");
+    };
+
+    map.on("click", handleClick);
+    return () => { map.off("click", handleClick); };
+  }, [mapMode, onAddWaypoint]);
+
+  // Waypoint markers — rebuild when routeState changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    import("leaflet").then((L) => {
+      // Remove all previous waypoint markers
+      waypointMarkersRef.current.forEach(m => m.remove());
+      waypointMarkersRef.current = [];
+
+      if (!routeState || routeState.waypoints.length === 0) return;
+
+      routeState.waypoints.forEach((w, i) => {
+        const isActive = i === routeState.activeIndex;
+        const m = L.marker([w.lat, w.lon], {
+          icon: L.divIcon({
+            html: waypointSvg(w, isActive),
+            className: "",
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+          }),
+          zIndexOffset: 900,
+          interactive: false,
+        }).addTo(map);
+        m.bindTooltip(`${w.name}`, { permanent: false, direction: "top" });
+        waypointMarkersRef.current.push(m);
+      });
+    });
+  }, [routeState]);
+
+  // Update laylines to point from active mark when one is set
+  useEffect(() => {
+    if (!markMetrics || !routeState || routeState.activeIndex < 0) return;
+    const mark = routeState.waypoints[routeState.activeIndex];
+    if (!mark) return;
+
+    import("leaflet").then((L) => {
+      const portEnd = projectPoint(mark.lat, mark.lon, markMetrics.portLaylineBrg, 3);
+      const stbdEnd = projectPoint(mark.lat, mark.lon, markMetrics.stbdLaylineBrg, 3);
+      laylinePortRef.current?.setLatLngs([[mark.lat, mark.lon], portEnd]);
+      laylineStbdRef.current?.setLatLngs([[mark.lat, mark.lon], stbdEnd]);
+    });
+  }, [markMetrics, routeState]);
 
   const fitFleet = React.useCallback(() => {
     if (!mapRef.current) return;
@@ -387,46 +580,69 @@ export default function RaceMap({ boat, targets, windGrid }: Props) {
 
   return (
     <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Race Chart</h2>
-        <div className="flex items-center gap-2 text-xs flex-wrap">
+      {/* Header row: title + legend */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Race Chart</h2>
+          {onExpand && (
+            <button
+              onClick={onExpand}
+              className="min-h-[36px] px-2.5 py-1.5 rounded border border-blue-500/40 text-blue-400 hover:text-blue-200 hover:border-blue-400 active:bg-blue-900/20 text-xs font-mono font-bold transition-colors"
+              title="Full-screen wind map"
+            >
+              ⤢ Full
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-3 text-xs">
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-green-500 border-2 border-white inline-block"></span><span className="text-gray-400">Own</span></span>
+          <span className="text-green-400">● Close</span>
+          <span className="text-red-400">● Open</span>
+          <span className="text-yellow-400">● Steady</span>
+        </div>
+      </div>
+      {/* Toolbar: horizontally scrollable on small screens, all buttons 44px tall */}
+      <div className="overflow-x-auto pb-1 mb-2">
+        <div className="flex items-center gap-2 font-mono min-w-max">
           <button onClick={fitFleet}
-            className="px-2 py-0.5 rounded border border-gray-600 text-gray-400 hover:text-white hover:border-gray-400 transition-colors font-mono">
-            ⊕ Fit Fleet
+            className="min-h-[44px] px-3 py-2 rounded border border-gray-600 text-sm text-gray-400 hover:text-white hover:border-gray-400 active:bg-gray-700 transition-colors whitespace-nowrap">
+            ⊕ Fleet
           </button>
+          {/* Map mode toggle */}
+          <div className="flex rounded border border-gray-600 overflow-hidden text-sm">
+            {(["pan", "addMark", "ruler"] as const).map(mode => (
+              <button
+                key={mode}
+                onClick={() => setMapMode(m => m === mode ? "pan" : mode)}
+                className={`min-h-[44px] px-3 py-2 transition-colors whitespace-nowrap ${mapMode === mode ? "bg-white/15 text-white" : "text-gray-500 hover:text-gray-300 active:bg-white/10"}`}
+              >
+                {mode === "pan" ? "Pan" : mode === "addMark" ? "✦ Add" : "📏 Ruler"}
+              </button>
+            ))}
+          </div>
+          {rulerHasContent && mapMode === "ruler" && (
+            <button
+              onClick={clearRulerCallback}
+              className="min-h-[44px] px-3 py-2 rounded border border-red-600/60 text-red-400 hover:text-red-300 text-sm transition-colors whitespace-nowrap"
+            >
+              ✕ Clear
+            </button>
+          )}
           <button
             onClick={() => setShowLaylines(v => !v)}
-            className={`px-2 py-0.5 rounded border text-xs font-mono transition-colors ${showLaylines ? "border-white/40 text-white bg-white/10" : "border-gray-600 text-gray-500"}`}
+            className={`min-h-[44px] px-3 py-2 rounded border text-sm transition-colors whitespace-nowrap ${showLaylines ? "border-white/40 text-white bg-white/10" : "border-gray-600 text-gray-500"}`}
           >
             Laylines {showLaylines ? "ON" : "OFF"}
           </button>
           <button
             onClick={() => setShowRings(v => !v)}
-            className={`px-2 py-0.5 rounded border text-xs font-mono transition-colors ${showRings ? "border-white/40 text-white bg-white/10" : "border-gray-600 text-gray-500"}`}
+            className={`min-h-[44px] px-3 py-2 rounded border text-sm transition-colors whitespace-nowrap ${showRings ? "border-white/40 text-white bg-white/10" : "border-gray-600 text-gray-500"}`}
           >
             ◎ Rings {showRings ? "ON" : "OFF"}
           </button>
-          <button
-            onClick={() => setRulerActive(v => !v)}
-            className={`px-2 py-0.5 rounded border text-xs font-mono transition-colors ${rulerActive ? "border-yellow-400/60 text-yellow-300 bg-yellow-900/20" : "border-gray-600 text-gray-500"}`}
-          >
-            📏 Ruler {rulerActive ? "ON" : "OFF"}
-          </button>
-          {rulerHasContent && (
-            <button
-              onClick={clearRulerCallback}
-              className="px-2 py-0.5 rounded border border-red-600/60 text-red-400 hover:text-red-300 text-xs font-mono transition-colors"
-            >
-              ✕ Clear
-            </button>
-          )}
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-green-500 border-2 border-white inline-block"></span>Rambler</span>
-          <span className="flex items-center gap-1 text-green-400">● Closing</span>
-          <span className="flex items-center gap-1 text-red-400">● Opening</span>
-          <span className="flex items-center gap-1 text-yellow-400">● Steady</span>
         </div>
       </div>
-      <div ref={containerRef} className="rounded-lg overflow-hidden" style={{ height: "480px", cursor: rulerActive ? "crosshair" : undefined }} />
+      <div ref={containerRef} className="rounded-lg overflow-hidden" style={{ height: "calc(100dvh - 220px)", minHeight: "420px", cursor: mapMode !== "pan" ? "crosshair" : undefined }} />
     </div>
   );
 }

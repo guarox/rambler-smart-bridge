@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Rambler Smart Bridge** is a marine data integration system for the J/99 sailboat *Rambler* (USA 99). This repository is a documentation and planning hub — the "code" produced here will be deployed onto a Raspberry Pi 5 running **OpenPlotter 4** aboard the vessel.
+**Rambler Smart Bridge** is a marine data integration system for the J/99 sailboat *Rambler* (USA 99). This repository is a documentation and planning hub — the "code" produced here will be deployed onto a Raspberry Pi 4 running **OpenPlotter 4** aboard the vessel.
 
-Primary hardware: Raspberry Pi 5 (8GB) + PICAN-M HAT (NMEA 2000 via SocketCAN) + Digital Yacht LANLink (N2K → Ethernet UDP) + XTAR-Link EL6 V3 (12V Starlink converter).
+Primary hardware: Raspberry Pi 4 (8GB) + PICAN-M HAT (NMEA 2000 via SocketCAN) + Digital Yacht LANLink (N2K → Ethernet UDP) + XTAR-Link EL6 V3 (12V Starlink converter).
 
 ## Architecture
 

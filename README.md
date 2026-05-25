@@ -2,7 +2,7 @@
 
 **Marine data hub and tactical race dashboard for Rambler (J/99, USA 99)**
 
-A Raspberry Pi 5–based system that bridges the boat's NMEA 2000 instrument network with real-time AIS competitor tracking, HRRR weather model integration, and a live tactical dashboard accessible to the entire crew.
+A Raspberry Pi 4–based system that bridges the boat's NMEA 2000 instrument network with real-time AIS competitor tracking, HRRR weather model integration, and a live tactical dashboard accessible to the entire crew.
 
 ---
 
@@ -29,11 +29,11 @@ The Smart Bridge acts as an intelligent overlay — pulling raw data from the NM
 ### Core System (Installed)
 | Component | Model | Role |
 |-----------|-------|------|
-| Computer | Raspberry Pi 5 (8GB) | Central data hub, runs all services |
+| Computer | Raspberry Pi 4 (8GB) | Central data hub, runs all services |
 | N2K Interface | PICAN-M HAT | NMEA 2000 → SocketCAN on Pi GPIO |
 | Enclosure | EDAL/GeeekPi Metal Armor | Passive cooling, marine environment |
 | Storage | SanDisk MAX Endurance 128GB | High write-cycle rated for InfluxDB |
-| Power | Blue Sea 12V→5V 5A USB-C Buck | Isolated, engine-noise filtered |
+| Power | Blue Sea 12V→5V 3A USB-C Buck | Isolated, engine-noise filtered |
 
 ### NMEA 2000 Network (Installed)
 | Component | Model | Role |
@@ -46,13 +46,13 @@ The Smart Bridge acts as an intelligent overlay — pulling raw data from the NM
 | Weather | B&G/Simrad WM-3 | SiriusXM satellite weather receiver |
 
 ### Procurement Status
-- ✅ Raspberry Pi 5 (8GB) + PICAN-M HAT + enclosure
+- ✅ Raspberry Pi 4 (8GB) + PICAN-M HAT + enclosure
 - ✅ All NMEA 2000 topology (LANLink, 4-port block, drop cables)
 - ✅ XTAR-Link EL6 V3 (12V Starlink converter)
 - ✅ 14AWG marine wire harness
 - ✅ SanDisk MAX Endurance 128GB
 - ✅ CAT6 patch cables
-- 🛒 **Ordering:** Generic 12V→5V 5A USB-C buck module (daily) + marine-grade isolated DC-DC converter (spare)
+- 🛒 **Ordering:** Generic 12V→5V 3A USB-C buck module (daily) + marine-grade isolated DC-DC converter (spare)
 - 🛒 **Ordering:** Blue Sea 4153 WeatherDeck toggle switch SPST ON-OFF (maintained, **not** momentary — part 4151 is wrong)
 
 ---

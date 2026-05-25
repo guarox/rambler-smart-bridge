@@ -20,43 +20,43 @@ export default function WindTrendPanel({ windShiftHistory, vmgHistory, polarHist
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
 
-        {/* Wind Shift — interpreted, not raw TWD */}
+        {/* Wind Shift */}
         <div>
           <LineChart
             data={windShiftHistory}
             color={shiftColor}
-            label="Net Wind Shift (vs 2min ago)"
+            label="Wind Shift"
             unit="°"
-            height={80}
-            formatValue={v => `${v > 0 ? "+" : ""}${v.toFixed(1)}°`}
+            height={100}
+            formatValue={v => `${v > 0 ? "+" : ""}${v.toFixed(1)}`}
           />
-          <p className="text-xs text-gray-600 mt-1 px-1">
-            {currentShift > 1 ? "▼ Veering — header on port / lift on stbd" :
-             currentShift < -1 ? "▲ Backing — lift on port / header on stbd" :
-             "Wind steady relative to 2min ago"}
+          <p className="text-sm text-gray-500 mt-1.5 px-1">
+            {currentShift > 1 ? "▼ Veer — header port / lift stbd" :
+             currentShift < -1 ? "▲ Back — lift port / header stbd" :
+             "Steady vs 2min ago"}
           </p>
         </div>
 
-        {/* VMG — chartplotter has no polar */}
+        {/* VMG */}
         <LineChart
           data={vmgHistory}
           color="#34d399"
           label="VMG Upwind"
           unit="kts"
-          height={80}
+          height={100}
           formatValue={v => v.toFixed(2)}
         />
 
-        {/* % Polar with alarm line */}
+        {/* % Polar */}
         <LineChart
           data={polarHistory}
           color="#a78bfa"
           label="% of Polar"
           unit="%"
-          height={80}
+          height={100}
           alarmThreshold={alarmThreshold}
           alarmColor="#ef4444"
-          formatValue={v => `${Math.round(v)}%`}
+          formatValue={v => `${Math.round(v)}`}
         />
       </div>
     </div>

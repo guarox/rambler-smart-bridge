@@ -25,3 +25,76 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Eliminate 300ms tap delay and prevent accidental double-tap zoom on buttons */
+button, [role="button"], input[type="range"], input[type="number"] {
+  touch-action: manipulation;
+}
+
+/* Ensure range inputs are tall enough for tablet touch */
+input[type="range"] {
+  min-height: 36px;
+  cursor: pointer;
+}
+
+/* ── Night mode overrides (deep red/black, night vision preserving) ── */
+[data-nightmode="true"] {
+  background: #0a0000 !important;
+  color: #ff4444 !important;
+}
+
+[data-nightmode="true"] main {
+  background: #0a0000 !important;
+  color: #ff4444 !important;
+}
+
+/* Card backgrounds */
+[data-nightmode="true"] .bg-gray-900,
+[data-nightmode="true"] .bg-slate-900,
+[data-nightmode="true"] .bg-slate-800,
+[data-nightmode="true"] .bg-slate-950 {
+  background-color: #1a0000 !important;
+}
+
+/* Borders */
+[data-nightmode="true"] .border-gray-700,
+[data-nightmode="true"] .border-slate-700,
+[data-nightmode="true"] .border-slate-800,
+[data-nightmode="true"] .border-gray-800,
+[data-nightmode="true"] .border-slate-600 {
+  border-color: #330000 !important;
+}
+
+/* Text colors */
+[data-nightmode="true"] .text-white,
+[data-nightmode="true"] .text-gray-100,
+[data-nightmode="true"] .text-slate-100 {
+  color: #ff4444 !important;
+}
+
+[data-nightmode="true"] .text-gray-400,
+[data-nightmode="true"] .text-slate-400,
+[data-nightmode="true"] .text-gray-300,
+[data-nightmode="true"] .text-slate-300,
+[data-nightmode="true"] .text-gray-500,
+[data-nightmode="true"] .text-slate-500 {
+  color: #cc3333 !important;
+}
+
+/* Accent values */
+[data-nightmode="true"] .text-blue-400,
+[data-nightmode="true"] .text-cyan-400,
+[data-nightmode="true"] .text-emerald-400,
+[data-nightmode="true"] .text-green-400 {
+  color: #ff6666 !important;
+}
+
+/* Header divider */
+[data-nightmode="true"] .border-slate-800 {
+  border-color: #330000 !important;
+}
+
+/* Leaflet map container — ensure dark background while tiles load */
+[data-nightmode="true"] .leaflet-container {
+  background: #0a0000 !important;
+}

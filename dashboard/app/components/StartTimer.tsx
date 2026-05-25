@@ -41,22 +41,22 @@ export default function StartTimer() {
       <div className="flex gap-2 flex-wrap">
         {PRESETS.map(p => (
           <button key={p} onClick={() => reset(p)}
-            className="px-2 py-1 text-xs font-mono border border-gray-600 rounded text-gray-400 hover:text-white hover:border-gray-400 transition-colors">
+            className="min-w-[44px] min-h-[44px] px-3 py-2 text-sm font-mono border border-gray-600 rounded text-gray-400 hover:text-white hover:border-gray-400 active:bg-gray-700 transition-colors">
             {p / 60}m
           </button>
         ))}
         <button onClick={sync}
-          className="px-2 py-1 text-xs font-mono border border-gray-600 rounded text-gray-400 hover:text-white hover:border-gray-400 transition-colors">
+          className="min-h-[44px] px-3 py-2 text-sm font-mono border border-gray-600 rounded text-gray-400 hover:text-white hover:border-gray-400 active:bg-gray-700 transition-colors">
           Sync
         </button>
       </div>
 
       <button
         onClick={() => setRunning(r => !r)}
-        className={`ml-auto px-4 py-2 rounded-lg font-bold text-sm transition-colors ${
+        className={`ml-auto min-h-[44px] px-5 py-2.5 rounded-lg font-bold text-base transition-colors ${
           running
-            ? "bg-red-600 hover:bg-red-700 text-white"
-            : "bg-green-600 hover:bg-green-700 text-white"
+            ? "bg-red-600 hover:bg-red-700 active:bg-red-800 text-white"
+            : "bg-green-600 hover:bg-green-700 active:bg-green-800 text-white"
         }`}
       >
         {running ? "■ Stop" : "▶ Start"}

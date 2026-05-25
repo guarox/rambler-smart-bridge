@@ -35,8 +35,8 @@ export default function LineChart({ data, color, label, unit, height = 72, alarm
   return (
     <div className="bg-gray-800/60 rounded-lg p-2">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xs text-gray-500 uppercase tracking-wide">{label}</span>
-        <span className="text-sm font-bold font-mono" style={{ color }}>{fmt(current)} {unit}</span>
+        <span className="text-sm text-gray-400 uppercase tracking-wide font-semibold">{label}</span>
+        <span className="text-base font-bold font-mono" style={{ color }}>{fmt(current)} {unit}</span>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height }}>
         {/* Grid lines */}
