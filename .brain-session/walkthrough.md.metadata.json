@@ -1,5 +1,0 @@
-{
-  "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
-  "summary": "Comprehensive walkthrough of the Weather Routing, PredictWind API, and NOAA HRRR GRIB Integration. Details the implementation of download_hrrr.py, Next.js API routes, map layers, settings panels, and verification results from Playwright tests.",
-  "updatedAt": "2026-05-25T13:58:44.279538Z"
-}
