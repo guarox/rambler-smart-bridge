@@ -19,7 +19,7 @@ export default defineConfig({
     },
   ],
   webServer: process.env.PLAYWRIGHT_TEST_BASE_URL ? undefined : {
-    command: process.env.CI ? "npm run start -- --port 3001" : "npm run dev -- --port 3001",
+    command: process.env.CI ? "npx -y serve out -p 3001" : "npm run dev -- --port 3001",
     url: "http://localhost:3001",
     reuseExistingServer: !process.env.CI,
     timeout: 30000,
